@@ -21,6 +21,7 @@ import { getAllDecks } from 'ducks/decks'
 import { getAllDevices } from 'ducks/devices'
 import { getAllDeckLocations } from 'ducks/deckLocations'
 import { getAllDeckZones } from "ducks/deckZones";
+import { getAllSecurityEvents } from "ducks/event";
 
 import ReactSwipeEvents from 'react-swipe-events'
 
@@ -103,6 +104,7 @@ class DashboardAlpha extends React.PureComponent {
     getAllDevices(dispatch);
     getAllDeckLocations(dispatch);
     getAllDeckZones(dispatch);
+    getAllSecurityEvents(dispatch);
     let items = [];
     const camera_count = cameras.length;
     const cols = 3;

@@ -1,10 +1,14 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import eventLogData from './eventLog-example'
+//import $ from 'jquery-ui'
 import './style.scss'
 
 const mapStateToProps = (state, props) => ({
     urls: state.urls,
+    eventInfo: state.eventInfo,
+    devicesInfo: state.devicesInfo,
+    deckLocationsInfo: state.deckLocationsInfo
 });
 
 const mapDispatchToProps = (dispatch, props) => ({
@@ -18,6 +22,7 @@ class EventView extends React.Component {
         border: 'blue',
         sortType: 'datetime',
         sortOrder: 0,
+        limit_count: 100
     };
 
     componentDidMount() {
@@ -37,21 +42,67 @@ class EventView extends React.Component {
       }
     };
 
+    handleScroll = (e) => {
+        var node = e.target;
+        const bottom = node.scrollHeight - node.scrollTop - node.clientHeight;
+        if(bottom < 10) {
+            let {limit_count} = this.state;
+            this.setState({
+                limit_count: limit_count + 100
+            });
+        }
+        console.log(node.scrollHeight, node.scrollTop, node.clientHeight)
+        console.log(bottom);
+    };
+
     render() {
-        let { border, sortType, sortOrder } = this.state;
+        let { border, sortType, sortOrder, limit_count } = this.state;
         let cornerImage = '';
         if(border ==='blue'){
             cornerImage = 'resources/images/background/blue-corner.png';
         }
-        let eventLogs = eventLogData;
+        let eventLogs = [];//eventLogData;//[];
+        let { eventInfo, devicesInfo, deckLocationsInfo } = this.props;
+        let eventArray = eventInfo.eventLogs;
+        let devicesArray = devicesInfo.devicesArray;
+        let deckLocationArray = deckLocationsInfo.deckLocationArray;
+        let count = limit_count > eventArray.length ? eventArray.length : limit_count;
+        let cur_eventArray = eventArray.slice(0, count);
+        cur_eventArray.forEach(event => {
+            let row = {};
+            row.eventType = event.EventMsg;
+            row.datetime = new Date(event.DateTime).toLocaleString('en-GB', { timeZone: 'UTC' }).replace(',', '');
+            row.device = event.SecurityDevice.DeviceName
+            row.location = event.SecurityDevice.DeckLocation.LocationName;
+            eventLogs.push(row);
+        });
+        // for( let i = 0 ; i < count ; i ++ ){
+        //     let event = eventArray[i];
+        //     setTimeout(() => {
+        //         let row = {};
+        //         row.datetime = new Date(event.DateTime).toLocaleString('en-GB', { timeZone: 'UTC' }).replace(',', '');
+        //         row.eventType = event.EventMsg.toUpperCase();
+        //         let cur_device = devicesArray.find( device => {
+        //             return device.DeviceID === event.DeviceID;
+        //         });
+        //         row.device = cur_device.DeviceName;
+        //         let cur_location = deckLocationArray.find( location => {
+        //             return location.LocationID === cur_device.LocationID;
+        //         });
+        //         row.location = cur_location.LocationName;
+        //         console.log("SecurityEventRow: ", row);
+        //         eventLogs.push(row);
+        //     }, 100);
+        // }
+
         switch (sortType) {
             case 'eventType': {
                 if(sortOrder === 0) {
-                    eventLogData.sort((a, b) => {
+                    eventLogs.sort((a, b) => {
                         return b.eventType === a.eventType ? 0 : b.eventType > a.eventType ? -1 : 1;
                     })
                 } else {
-                    eventLogData.sort((a, b) => {
+                    eventLogs.sort((a, b) => {
                         return b.eventType === a.eventType ? 0 : b.eventType < a.eventType ? -1 : 1;
                     })
                 }
@@ -59,13 +110,13 @@ class EventView extends React.Component {
             }
             case 'datetime': {
                 if(sortOrder === 0) {
-                    eventLogData.sort((a, b) => {
+                    eventLogs.sort((a, b) => {
                         let t_1 = new Date(a.datetime).getTime();
                         let t_2 = new Date(b.datetime).getTime();
                         return t_2 - t_1;
                     });
                 } else {
-                    eventLogData.sort((a, b) => {
+                    eventLogs.sort((a, b) => {
                         let t_1 = new Date(a.datetime).getTime();
                         let t_2 = new Date(b.datetime).getTime();
                         return t_1 - t_2;
@@ -75,11 +126,11 @@ class EventView extends React.Component {
             }
             case 'location': {
                 if(sortOrder === 0) {
-                    eventLogData.sort((a, b) => {
+                    eventLogs.sort((a, b) => {
                         return b.location === a.location ? 0 : b.location > a.location ? -1 : 1;
                     })
                 } else {
-                    eventLogData.sort((a, b) => {
+                    eventLogs.sort((a, b) => {
                         return b.location === a.location ? 0 : b.location < a.location ? -1 : 1;
                     })
                 }
@@ -87,11 +138,11 @@ class EventView extends React.Component {
             }
             case 'device': {
                 if(sortOrder === 0) {
-                    eventLogData.sort((a, b) => {
+                    eventLogs.sort((a, b) => {
                         return b.device === a.device ? 0 : b.device > a.device ? -1 : 1;
                     })
                 } else {
-                    eventLogData.sort((a, b) => {
+                    eventLogs.sort((a, b) => {
                         return b.device === a.device ? 0 : b.device < a.device ? -1 : 1;
                     })
                 }
@@ -103,7 +154,7 @@ class EventView extends React.Component {
                 <div className={"captionArea"}>EVENT LOG</div>
                 <div className={"sortArea"}>
                     <div
-                        className={sortType === 'time'?"sortItem selected":"sortItem"}
+                        className={sortType === 'datetime'?"sortItem selected":"sortItem"}
                         onClick={this.onSortClick.bind(this, "datetime")}
                     >
                         {sortType === 'datetime' && sortOrder === 1 ? (
@@ -169,9 +220,10 @@ class EventView extends React.Component {
                     <div className={"col-3 headerItem"}>LOCATION</div>
                     <div className={"col-3 headerItem"}>DEVICE</div>
                 </div>
-                <div className={"mainContainer"}>
+                <div className={"mainContainer"} onScroll={this.handleScroll}>
                     <div className={"tableArea"}>
-                        {eventLogs.map( event => {
+                        {
+                            eventLogs.map( event => {
                             let className = "row eventRow";
                             switch (event.type) {
                                 case 'red': {
