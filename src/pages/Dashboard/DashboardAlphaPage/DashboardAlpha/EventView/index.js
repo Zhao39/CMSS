@@ -52,16 +52,16 @@ class EventView extends React.Component {
         limit_count: limit_count + 100,
       })
     }
-    console.log(bottom);
+    console.log(bottom)
   };
 
   render() {
     let { border, sortType, sortOrder, limit_count } = this.state;
     let cornerImage = '';
     if (border === 'blue') {
-      cornerImage = 'resources/images/background/blue-corner.png'
+      cornerImage = 'resources/images/background/blue-corner.png';
     }
-    let eventLogs = []; //eventLogData;//[];
+    let eventLogs = [] ;//eventLogData;//[];
     let { eventInfo, devicesInfo, deckLocationsInfo } = this.props;
     let eventArray = eventInfo.eventLogs;
     let devicesArray = devicesInfo.devicesArray;
@@ -70,32 +70,22 @@ class EventView extends React.Component {
     let cur_eventArray = eventArray.slice(0, count);
     cur_eventArray.forEach(event => {
       let row = {};
-      row.eventType = event.EventMsg;
+      row.eventType = event.EventMsg.toUpperCase();
       row.datetime = new Date(event.DateTime)
         .toLocaleString('en-GB', { timeZone: 'UTC' })
         .replace(',', '');
-      row.device = event.SecurityDevice.DeviceName;
-      row.location = event.SecurityDevice.DeckLocation.LocationName;
+      row.device = event.SecurityDevice.DeviceName.toUpperCase();
+      row.location = event.SecurityDevice.DeckLocation.LocationName.toUpperCase();
+      let type_temp = row.eventType.split(' ');
+      if(type_temp.includes("GRANTED")) {
+          row.type = "green";
+      } else if(type_temp.includes("SENSOR") || type_temp.includes("DETECTED") || type_temp.includes("MOTION")) {
+          row.type = "red";
+      } else {
+          row.type = "blue";
+      }
       eventLogs.push(row);
     });
-    // for( let i = 0 ; i < count ; i ++ ){
-    //     let event = eventArray[i];
-    //     setTimeout(() => {
-    //         let row = {};
-    //         row.datetime = new Date(event.DateTime).toLocaleString('en-GB', { timeZone: 'UTC' }).replace(',', '');
-    //         row.eventType = event.EventMsg.toUpperCase();
-    //         let cur_device = devicesArray.find( device => {
-    //             return device.DeviceID === event.DeviceID;
-    //         });
-    //         row.device = cur_device.DeviceName;
-    //         let cur_location = deckLocationArray.find( location => {
-    //             return location.LocationID === cur_device.LocationID;
-    //         });
-    //         row.location = cur_location.LocationName;
-    //         console.log("SecurityEventRow: ", row);
-    //         eventLogs.push(row);
-    //     }, 100);
-    // }
 
     switch (sortType) {
       case 'eventType': {

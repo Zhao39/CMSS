@@ -13,7 +13,8 @@ const mapStateToProps = (state, props) => ({
   devices: state.devicesInfo,
   deckLocations: state.deckLocationsInfo,
   accessInfo: state.accessInfo,
-})
+  eventInfo: state.eventInfo
+});
 
 const mapDispatchToProps = (dispatch, props) => ({
   dispatch: dispatch,
@@ -109,7 +110,8 @@ class DeckView extends React.PureComponent {
                   },
                   cameraPopupInfo: {}
               });
-              getSecurityEventsByDeviceID(accessInfo, dispatch);
+              let eventLogs = this.props.eventInfo.eventLogs;
+              getSecurityEventsByDeviceID(accessInfo, eventLogs, dispatch);
               document.getElementById("root").style.cursor = "wait";
               triggerManualEvent();
               break;

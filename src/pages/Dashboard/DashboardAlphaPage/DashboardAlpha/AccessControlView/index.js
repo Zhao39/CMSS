@@ -23,8 +23,9 @@ class AccessControlView extends React.Component {
     state = {
         sortType: 'datetime',
         sortOrder: 0,
-        selectRow: 0
-    }
+        selectRow: 0,
+        limit_count: 10
+    };
 
     cameraController = null;
 
@@ -33,7 +34,8 @@ class AccessControlView extends React.Component {
         this.setState({
             sortType: 'datetime',
             sortOrder: 0,
-            selectRow: 0
+            selectRow: 0,
+            limit_count: 10
         });
         let accessInfo = {
             enabled: false,
@@ -57,38 +59,51 @@ class AccessControlView extends React.Component {
             type: 'CLEAR_DATA',
             accessInfo: accessInfo,
         });
-    }
+    };
 
     onScroll = e => {
-        e.preventDefault()
-    }
+        e.preventDefault();
+        var node = e.target
+        const bottom = node.scrollHeight - node.scrollTop - node.clientHeight
+        if (bottom < 10) {
+            let { limit_count } = this.state;
+            this.setState({
+                limit_count: limit_count + 10,
+            })
+        }
+        console.log(bottom)
+    };
 
     filterButtonClick = (type) => {
         console.log(type);
-        let { sortType, sortOrder } = this.state
+        let { sortType, sortOrder } = this.state;
         if(sortType === type) {
             this.setState({
                 sortOrder: 1 - sortOrder
-            })
+            });
         } else {
             this.setState({
                 sortType: type,
                 sortOrder: 1
-            })
+            });
         }
     };
 
     onLogHistoryRowClick = index => {
         this.setState({
             selectRow: index - 1
-        })
+        });
     };
 
     render() {
         let accessLogoImage = 'resources/images/icons/accessControl/Access Control Logo.svg';
         let accessInfo = this.props.logInfo.accessInfo;
-        let logHistoryArray = this.props.logInfo.logHistory;
-        if(accessInfo.count !== logHistoryArray.length) return(<div/>);
+        let logHistory = this.props.logInfo.logHistory;
+        let { limit_count } = this.state;
+        let rowCount = limit_count > logHistory.length ? logHistory.length : limit_count;
+        console.log("rowCount: ", rowCount, logHistory)
+        let logHistoryArray = logHistory.slice(0, rowCount);
+        //if(accessInfo.count !== logHistoryArray.length) return(<div/>);
         let roomName = 'GUEST CABIN1';
         let deckName = 'DECK 4';
         let clearanceLevel = 0;
@@ -97,7 +112,6 @@ class AccessControlView extends React.Component {
         let loadIconShow = 'flex';
         let display = 'none';
         let { sortType, sortOrder, selectRow } = this.state;
-        let rowCount = logHistoryArray.length;
         let borderRadiusAreaDisplay = 'none';
         let historyTableBottom = 'historyTable radius';
         if(rowCount > 10) {

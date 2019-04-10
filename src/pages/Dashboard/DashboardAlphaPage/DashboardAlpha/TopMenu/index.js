@@ -13,7 +13,8 @@ const mapStateToProps = (state, props) => ({
     accessInfo: state.accessInfo,
     deckLocations: state.deckLocationsInfo,
     widgetInfo: state.widgetInfo,
-    deckZonesInfo: state.deckZonesInfo
+    deckZonesInfo: state.deckZonesInfo,
+    eventInfo: state.eventInfo
 });
 
 const mapDispatchToProps = (dispatch, props) => ({
@@ -135,7 +136,8 @@ class TopMenu extends React.Component {
         let { dispatch } = this.props;
         console.log("accessInfo: ", accessInfo)
         if(accessInfo.EquipmentTypeID !== 3)return;
-        getSecurityEventsByDeviceID(accessInfo, dispatch);
+        let eventLogs = this.props.eventInfo.eventLogs;
+        getSecurityEventsByDeviceID(accessInfo, eventLogs, dispatch);
         document.getElementById("root").style.cursor = "wait";
         triggerManualEvent();
     };

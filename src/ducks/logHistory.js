@@ -45,57 +45,51 @@ export default function (state = INITIAL_STATE, action) {
     return state;
 }
 
-export let getSecurityEventsByDeviceID = (accessInfo, dispatch) => {
+export let getSecurityEventsByDeviceID = (accessInfo, eventLogs, dispatch) => {
     let deviceId = accessInfo.DeviceID;
     let url = rootReducer.serverUrl + '/api/SecurityEvents?DeviceID=' + deviceId;
-    axios.get(url).then( response => {
-        let securityEvents = response.data;
-        securityEvents.forEach(event => {
-            let row = {};
-            row.datetime = event.DateTime;
-            let datetime = new Date(event.DateTime);
-            let t_day = datetime.getDate()<10?('0'+datetime.getDate().toString()):datetime.getDate().toString();
-            let t_month = datetime.getMonth()<10?('0'+(datetime.getMonth()+1).toString()):(datetime.getMonth()+1).toString();
-            let t_year = datetime.getFullYear();
-            row.date = t_month + "/" + t_day + "/" + t_year;
+    let securityEvents = eventLogs.filter(event => {
+        return event.DeviceID === deviceId;
+    });
+    securityEvents.forEach(event => {
+        let row = {};
+        row.datetime = event.DateTime;
+        let datetime_string = new Date(event.DateTime)
+            .toLocaleString('en-GB', { timeZone: 'UTC' })
+            .replace(',', '');
+        row.date = datetime_string.split(' ')[0];
+        row.time = datetime_string.split(' ')[1];
 
-            let t__hour = datetime.getHours();
-            let t_hour = t__hour<10?('0'+t__hour.toString()):t__hour.toString();
-            let t_min = datetime.getMinutes()<10?('0'+datetime.getMinutes().toString()):datetime.getMinutes().toString();
-            let t_sec = datetime.getSeconds()<10?('0'+datetime.getSeconds().toString()):datetime.getSeconds().toString();
-            row.time = t_hour + ':' + t_min + ':' + t_sec;
-
-            let eventId = event.EventID;
-            row.access = (event.EventMsg.split(" ").length > 1?
-                event.EventMsg.split(" ")[1]:event.EventMsg).toUpperCase();
-            row.operator = "";
-            row.clearanceId = 0;
-            row.memberId = "";
-            getEventAttributeByEventID(eventId, (eventAttribute) => {
-                if(eventAttribute.hasOwnProperty("AttributeValueString")){
-                    row.operator = eventAttribute.AttributeValueString;
-                    getUserByUsername(row.operator, (user) => {
-                        row.memberId = user.UserID;
-                        row.clearanceId = user.UserSecurityClearance_ClearanceID;
-                        dispatch({
-                            type: "PUSH_DATA",
-                            data: row
-                        })
-                    });
-                } else {
+        let eventId = event.EventID;
+        row.access = (event.EventMsg.split(" ").length > 1?
+            event.EventMsg.split(" ")[1]:event.EventMsg).toUpperCase();
+        row.operator = "";
+        row.clearanceId = 0;
+        row.memberId = "";
+        getEventAttributeByEventID(eventId, (eventAttribute) => {
+            if(eventAttribute.hasOwnProperty("AttributeValueString")){
+                row.operator = eventAttribute.AttributeValueString;
+                getUserByUsername(row.operator, (user) => {
+                    row.memberId = user.UserID;
+                    row.clearanceId = user.UserSecurityClearance_ClearanceID;
                     dispatch({
                         type: "PUSH_DATA",
                         data: row
                     })
-                }
-            });
-
+                });
+            } else {
+                dispatch({
+                    type: "PUSH_DATA",
+                    data: row
+                })
+            }
         });
-        accessInfo.count = securityEvents.length;
-        dispatch({
-            type: 'SET_ACCESS',
-            accessInfo: accessInfo,
-        })
+
+    });
+    accessInfo.count = securityEvents.length;
+    dispatch({
+        type: 'SET_ACCESS',
+        accessInfo: accessInfo,
     })
 };
 
