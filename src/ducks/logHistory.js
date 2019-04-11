@@ -3,6 +3,7 @@ import axios from 'axios'
 
 const INITIAL_STATE = {
   logHistory: [],
+  deviceAttributeArray: [],
   accessInfo: {
     enabled: false,
     AuxDeviceID: -1,
@@ -38,40 +39,43 @@ export default function(state = INITIAL_STATE, action) {
     case 'SET_IMAGE': {
       return { ...state, ...(state.cameraImage = action.cameraImage) }
     }
+    case 'SET_DEVICE_ATTRIBUTES': {
+      return { ...state, ...(state.deviceAttributeArray = action.deviceAttributeArray) }
+    }
     default:
   }
-  return state
+  return state;
 }
 
 export let getSecurityEventsByDeviceID = (accessInfo, eventLogs, dispatch) => {
-  let deviceId = accessInfo.DeviceID
-  let url = rootReducer.serverUrl + '/api/SecurityEvents?DeviceID=' + deviceId
+  let deviceId = accessInfo.DeviceID;
+  let url = rootReducer.serverUrl + '/api/SecurityEvents?DeviceID=' + deviceId;
   let securityEvents = eventLogs.filter(event => {
-    return event.DeviceID === deviceId
-  })
+    return event.DeviceID === deviceId;
+  });
   securityEvents.forEach(event => {
-    let row = {}
-    row.datetime = event.DateTime
+    let row = {};
+    row.datetime = event.DateTime;
     let datetime_string = new Date(event.DateTime)
       .toLocaleString('en-GB', { timeZone: 'UTC' })
-      .replace(',', '')
-    row.date = datetime_string.split(' ')[0]
-    row.time = datetime_string.split(' ')[1]
+      .replace(',', '');
+    row.date = datetime_string.split(' ')[0];
+    row.time = datetime_string.split(' ')[1];
 
-    let eventId = event.EventID
+    let eventId = event.EventID;
     row.access = (event.EventMsg.split(' ').length > 1
       ? event.EventMsg.split(' ')[1]
       : event.EventMsg
-    ).toUpperCase()
-    row.operator = ''
-    row.clearanceId = 0
-    row.memberId = ''
+    ).toUpperCase();
+    row.operator = '';
+    row.clearanceId = 0;
+    row.memberId = '';
     getEventAttributeByEventID(eventId, eventAttribute => {
       if (eventAttribute.hasOwnProperty('AttributeValueString')) {
-        row.operator = eventAttribute.AttributeValueString
+        row.operator = eventAttribute.AttributeValueString;
         getUserByUsername(row.operator, user => {
-          row.memberId = user.UserID
-          row.clearanceId = user.UserSecurityClearance_ClearanceID
+          row.memberId = user.UserID;
+          row.clearanceId = user.UserSecurityClearance_ClearanceID;
           dispatch({
             type: 'PUSH_DATA',
             data: row,
@@ -84,32 +88,44 @@ export let getSecurityEventsByDeviceID = (accessInfo, eventLogs, dispatch) => {
         })
       }
     })
-  })
-  accessInfo.count = securityEvents.length
+  });
+  accessInfo.count = securityEvents.length;
   dispatch({
     type: 'SET_ACCESS',
     accessInfo: accessInfo,
-  })
-}
+  });
+};
 
 let getEventAttributeByEventID = (eventId, callback) => {
-  let url = rootReducer.serverUrl + '/api/EventAttributes?EventID=' + eventId
+  let url = rootReducer.serverUrl + '/api/EventAttributes?EventID=' + eventId;
   axios.get(url).then(response => {
-    let eventAttribute = response.data
+    let eventAttribute = response.data;
     callback(eventAttribute)
   })
-}
+};
+
 let getUserByUsername = (username, callback) => {
-  let url = rootReducer.serverUrl + '/api/Users?username=' + username
+  let url = rootReducer.serverUrl + '/api/Users?username=' + username;
   axios.get(url).then(response => {
-    let user = response.data
-    callback(user)
+    let user = response.data;
+    callback(user);
   })
-}
+};
 
 export let getCameraInfoByDeviceId = (deviceId, callback) => {
-  let url = rootReducer.serverUrl + '/api/DeviceAttributes?SecurityDeviceID=' + deviceId
+  let url = rootReducer.serverUrl + '/api/DeviceAttributes?SecurityDeviceID=' + deviceId;
   axios.get(url).then(response => {
-    callback(response.data)
+    callback(response.data);
   })
-}
+};
+
+export let getAllDeviceAttributes = (dispatch) => {
+    let url = rootReducer.serverUrl + '/api/DeviceAttributes/all';
+    axios.get(url).then(response => {
+        let deviceAttributes = response.data;
+        dispatch({
+            type: 'SET_DEVICE_ATTRIBUTES',
+            deviceAttributeArray: deviceAttributes
+        });
+    })
+};

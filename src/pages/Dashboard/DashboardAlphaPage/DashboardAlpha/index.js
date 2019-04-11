@@ -22,12 +22,13 @@ import { getAllDevices } from 'ducks/devices'
 import { getAllDeckLocations } from 'ducks/deckLocations'
 import { getAllDeckZones } from 'ducks/deckZones'
 import { getAllSecurityEvents } from 'ducks/event'
+import { getAllDeviceAttributes } from "ducks/logHistory";
 
 import ReactSwipeEvents from 'react-swipe-events'
 
 const mapDispatchToProps = (dispatch, props) => ({
   dispatch: dispatch,
-})
+});
 
 const mapStateToProps = (state, props) => ({
   urls: state.urls,
@@ -35,23 +36,23 @@ const mapStateToProps = (state, props) => ({
   widgetInfo: state.widgetInfo,
   accessInfo: state.accessInfo,
   eventInfo: state.eventInfo,
-})
+});
 
-const ResponsiveReactGridLayout = WidthProvider(Responsive)
-const sw_value = 400
+const ResponsiveReactGridLayout = WidthProvider(Responsive);
+const sw_value = 400;
 const defaultProps = {
   className: 'layout',
   cols: { lg: 12, md: 10, sm: 6, xs: 4, xxs: 2 },
   rowHeight: 139,
   margin: [2, 2],
-}
+};
 @connect(
   mapStateToProps,
   mapDispatchToProps,
 )
 class DashboardAlpha extends React.PureComponent {
   constructor(props) {
-    super(props)
+    super(props);
     this.state = {
       day: new Date(),
       items: [0, 1, 2, 3, 4].map(function(i, key, list) {
@@ -63,53 +64,55 @@ class DashboardAlpha extends React.PureComponent {
           h: 2,
         }
       }),
-    }
-    this.handleChange = this.handleChange.bind(this)
+    };
+    this.handleChange = this.handleChange.bind(this);
   }
 
   componentWillMount() {
     //requestAllStreams(this.state.cameras);
-    let { dispatch, widgetInfo, urls } = this.props
-    let cameras = urls.cameras
+    let { dispatch, widgetInfo, urls } = this.props;
+    let cameras = urls.cameras;
     dispatch({
       type: 'SET_PLAYBACK_VIEW',
       playbackView: { visible: true },
-    })
+    });
     dispatch({
       type: 'SET_DECK_VIEW',
       deckView: { visible: true },
-    })
+    });
     dispatch({
       type: 'SET_SENSOR_VIEW',
       sensorView: { visible: true },
-    })
+    });
     dispatch({
       type: 'SET_EVENT_VIEW',
       eventView: { visible: true },
-    })
+    });
 
-    let cameraViews = []
+    let cameraViews = [];
     cameras.map(camera => {
       cameraViews.push({
         id: camera.Id,
         visible: true,
       })
-    })
+    });
     dispatch({
       type: 'SET_CAMERA_VIEWS',
       cameraViews: cameraViews,
-    })
+    });
 
-    getAllDecks(dispatch)
-    getAllDevices(dispatch)
-    getAllDeckLocations(dispatch)
-    getAllDeckZones(dispatch)
-    getAllSecurityEvents(dispatch)
-    let items = []
-    const camera_count = cameras.length
-    const cols = 3
-    const w = 3
-    const h = 2
+    getAllDecks(dispatch);
+    getAllDevices(dispatch);
+    getAllDeckLocations(dispatch);
+    getAllDeckZones(dispatch);
+    getAllSecurityEvents(dispatch);
+    getAllDeviceAttributes(dispatch);
+
+    let items = [];
+    const camera_count = cameras.length;
+    const cols = 3;
+    const w = 3;
+    const h = 2;
     if (camera_count > 0) {
       for (let i = 0; i < camera_count; i++) {
         items.push({

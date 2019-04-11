@@ -1,13 +1,14 @@
 @import '../../../../../resources/mixins';
 
-.CameraController {
+.EventLogView {
   border: none;
   position: absolute;
   width: 100%;
   height: 100%;
   top: 0;
   left: 0;
-  background: rgba(30,30,30,0);
+  //background: rgba(30,30,30,0);
+  background: rgba(0, 19, 33, 0.4);
   overflow: hidden;
   .headerArea {
     width: calc(100% - 50px);

@@ -8,9 +8,9 @@ let VideoConnectionSignal = {
 }
 class accessStream {
   constructor(camera) {
+    console.log("currentCamera: ", camera)
     this.Id = camera.Id;
-    console.log("cameraId: ", this.Id);
-    this.image = document.getElementById("accessPointCamera");
+    this.image = document.getElementById('accessPointCamera');
     if (this.image === null) return null;
     this.image.addEventListener('load', this.onImageLoad);
     this.image.addEventListener('error', this.onImageError);
@@ -18,27 +18,30 @@ class accessStream {
     this.videoConnectionObserver = {
       videoConnectionReceivedFrame: this.videoConnectionReceivedFrame,
     };
-    this.isLive = true;
     this.loading = true;
 
     /**
      * Requesting a video stream.
      */
-    this.streamRequest = mobileSDK.requestStream(
-      this.Id,
-      this.destination,
-      null,
-      this.requestStreamCallback,
-      function(error) {},
-    )
-
+    this.streamRequest = this.requestStream();
   }
+
+  requestStream = () => {
+      console.log("Sending Request Stream");
+      mobileSDK.requestStream(
+          this.Id,
+          this.destination,
+          null,
+          this.requestStreamCallback,
+          function(error) {},
+      )
+  };
 
   /**
    * Close Video stream request
    */
   closeVideoConnection = () => {
-    console.log('close video id', this.videoController)
+    console.log('close video id', this.videoController);
     if (this.videoController) {
       mobileSDK.closeStream(this.videoController.videoId)
     }
@@ -49,37 +52,43 @@ class accessStream {
    */
   requestStreamCallback = videoConnection => {
     if (videoConnection != null) {
-      this.videoController = videoConnection
-      videoConnection.addObserver(this.videoConnectionObserver)
-      videoConnection.open()
+        if(videoConnection.cameraId === this.Id){
+            this.videoController = videoConnection;
+            videoConnection.addObserver(this.videoConnectionObserver);
+            videoConnection.open();
+        } else {
+            mobileSDK.closeStream(videoConnection.videoId)
+        }
     }
-  }
+  };
 
   /**
    * Executed on received frame.
    */
   videoConnectionReceivedFrame = frame => {
-    if (this.image && !this.drawing && frame.dataSize > 0) {
-      this.drawing = true
-
-      if (frame.hasSizeInformation) {
-        var multiplier =
-          frame.sizeInfo.destinationSize.resampling * mobileSDK.getResamplingFactor() || 1;
-        this.image.width = multiplier * frame.sizeInfo.destinationSize.width
-        this.image.height = multiplier * frame.sizeInfo.destinationSize.height
+      if (this.image && !this.drawing && frame.dataSize > 0) {
+          this.drawing = true;
+          if (frame.hasSizeInformation) {
+              var multiplier =
+                  frame.sizeInfo.destinationSize.resampling * mobileSDK.getResamplingFactor() || 1;
+              this.image.width = multiplier * frame.sizeInfo.destinationSize.width;
+              this.image.height = multiplier * frame.sizeInfo.destinationSize.height;
+          }
+          if (this.imageURL) {
+              window.URL.revokeObjectURL(this.imageURL);
+          }
+          if (this.Id === this.videoController.cameraId) {
+              this.imageURL = window.URL.createObjectURL(frame.blob);
+              if (this.loading) {
+                  $('#cameraLoadingArea')[0].style.display = 'none';
+                  this.loading = false;
+              }
+              this.image.src = this.imageURL
+          } else {
+              this.closeVideoConnection();
+          }
       }
-      if (this.imageURL) {
-        window.URL.revokeObjectURL(this.imageURL)
-      }
-
-      this.imageURL = window.URL.createObjectURL(frame.blob)
-      if (this.loading) {
-        $('#cameraLoadingArea')[0].style.display = 'none'
-        this.loading = false
-      }
-      this.image.src = this.imageURL
-    }
-  }
+  };
 
   /**
    * Executed on image load.
@@ -90,23 +99,7 @@ class accessStream {
 
   onImageError = event => {
     this.drawing = false
-  }
-
-  /**
-   * Stop camera stream
-   */
-  stop = () => {
-    if (this.videoController) {
-      this.videoController.removeObserver(this.videoConnectionObserver)
-      this.videoController.close()
-      this.videoController = null
-    }
-    if (this.streamRequest) {
-      mobileSDK.cancelRequest(this.streamRequest)
-      this.streamRequest = null
-    }
-  }
-
+  };
 }
 
 export { accessStream }
