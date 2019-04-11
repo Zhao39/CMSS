@@ -12,6 +12,7 @@ import widgetInfo from './widget'
 import logInfo from './logHistory'
 import deckZonesInfo from './deckZones'
 import eventInfo from './event'
+import systemInfo from './system'
 
 export default combineReducers({
   routing: routerReducer,
@@ -25,6 +26,7 @@ export default combineReducers({
   logInfo: logInfo,
   deckZonesInfo: deckZonesInfo,
   eventInfo: eventInfo,
+  systemInfo: systemInfo,
   app,
   login,
 })

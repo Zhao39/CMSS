@@ -36,22 +36,43 @@ class LoginForm extends React.Component {
 
         this.ws.onmessage = (evt) => {
             var received_msg = evt.data;
-            console.log(received_msg);
             let temp_array = received_msg.split("<");
-            if(temp_array.length === 8) {
+            if(temp_array.length > 1){
+                let command = temp_array[1].replace('>', '');
                 let {dispatch} = this.props;
-                cookie.save("UserName", temp_array[2].slice(0, -1));
-                cookie.save("Password", temp_array[3].slice(0, -1));
-                cookie.save("MilestoneUser", temp_array[5].slice(0, -1));
-                cookie.save("MilestonePassword", temp_array[6].slice(0, -1));
-                cookie.save("UserSecurityClearance", temp_array[7].slice(0, -1));
-                dispatch(submit({
-                    username: temp_array[5].slice(0, -1),
-                    password: temp_array[6].slice(0, -1)
-                }));
-            } else {
-                message.error('Invalid username or password')
+                switch (command) {
+                    case "UserLogon": {
+                        if(temp_array.length === 8) {
+                            cookie.save("UserName", temp_array[2].slice(0, -1));
+                            cookie.save("Password", temp_array[3].slice(0, -1));
+                            cookie.save("MilestoneUser", temp_array[5].slice(0, -1));
+                            cookie.save("MilestonePassword", temp_array[6].slice(0, -1));
+                            cookie.save("UserSecurityClearance", temp_array[7].slice(0, -1));
+                            dispatch(submit({
+                                username: temp_array[5].slice(0, -1),
+                                password: temp_array[6].slice(0, -1)
+                            }));
+                            let data = "<GetSystemInfo>";
+                            this.ws.send(data);
+                        } else {
+                            message.error('Invalid username or password')
+                        }
+                        break;
+                    }
+                    case "GetSystemInfo": {
+                        let systemSecurityLevel = 1;
+                        if(temp_array.length === 7) {
+                            systemSecurityLevel = temp_array[3].replace('>', '');
+                        }
+                        dispatch({
+                           type: "SET_System_Security_Level",
+                           systemSecurityLevel: systemSecurityLevel
+                        });
+                        break;
+                    }
+                }
             }
+
         };
 
         this.ws.onclose = () => {
@@ -72,21 +93,41 @@ class LoginForm extends React.Component {
         };
         this.ws.onmessage = (evt) => {
             var received_msg = evt.data;
-            console.log(received_msg);
             let temp_array = received_msg.split("<");
-            if(temp_array.length === 8) {
+            if(temp_array.length > 1){
+                let command = temp_array[1].replace('>', '');
                 let {dispatch} = this.props;
-                cookie.save("UserName", temp_array[2].slice(0, -1));
-                cookie.save("Password", temp_array[3].slice(0, -1));
-                cookie.save("MilestoneUser", temp_array[5].slice(0, -1));
-                cookie.save("MilestonePassword", temp_array[6].slice(0, -1));
-                cookie.save("UserSecurityClearance", temp_array[7].slice(0, -1));
-                dispatch(submit({
-                    username: temp_array[5].slice(0, -1),
-                    password: temp_array[6].slice(0, -1)
-                }));
-            } else {
-                message.error('Invalid username or password')
+                switch (command) {
+                    case "UserLogon": {
+                        if(temp_array.length === 8) {
+                            cookie.save("UserName", temp_array[2].slice(0, -1));
+                            cookie.save("Password", temp_array[3].slice(0, -1));
+                            cookie.save("MilestoneUser", temp_array[5].slice(0, -1));
+                            cookie.save("MilestonePassword", temp_array[6].slice(0, -1));
+                            cookie.save("UserSecurityClearance", temp_array[7].slice(0, -1));
+                            dispatch(submit({
+                                username: temp_array[5].slice(0, -1),
+                                password: temp_array[6].slice(0, -1)
+                            }));
+                            let data = "<GetSystemInfo>";
+                            this.ws.send(data);
+                        } else {
+                            message.error('Invalid username or password')
+                        }
+                        break;
+                    }
+                    case "GetSystemInfo": {
+                        let systemSecurityLevel = 1;
+                        if(temp_array.length === 7) {
+                            systemSecurityLevel = temp_array[3].replace('>', '');
+                        }
+                        dispatch({
+                            type: "SET_System_Security_Level",
+                            systemSecurityLevel: systemSecurityLevel
+                        });
+                        break;
+                    }
+                }
             }
         };
 
