@@ -1,10 +1,10 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 import { connect } from 'react-redux'
-import {getSecurityEventsByDeviceID} from "ducks/logHistory";
-import CameraPopup from "./CameraPopup";
-import DeckSensorPopup from "./DeckSensorPopup"
-import { triggerManualEvent } from "ducks/Milestone";
+import { getSecurityEventsByDeviceID } from 'ducks/logHistory'
+import CameraPopup from './CameraPopup'
+import DeckSensorPopup from './DeckSensorPopup'
+import { triggerManualEvent } from 'ducks/Milestone'
 import './style.scss'
 
 const mapStateToProps = (state, props) => ({
@@ -13,12 +13,12 @@ const mapStateToProps = (state, props) => ({
   devices: state.devicesInfo,
   deckLocations: state.deckLocationsInfo,
   accessInfo: state.accessInfo,
-  eventInfo: state.eventInfo
-});
+  eventInfo: state.eventInfo,
+})
 
 const mapDispatchToProps = (dispatch, props) => ({
   dispatch: dispatch,
-});
+})
 
 @connect(
   mapStateToProps,
@@ -26,20 +26,20 @@ const mapDispatchToProps = (dispatch, props) => ({
 )
 class DeckView extends React.PureComponent {
   state = {
-      border: 'blue',
-      cameraPopupDisplay: {
-          display: 'none',
-          left: 0,
-          top: 0
-      },
-      cameraPopupInfo: {},
-      deckSensorPopupDisplay: {
-          display: 'none',
-          left: 0,
-          top: 0
-      },
-      deckSensorPopupInfo: {}
-  };
+    border: 'blue',
+    cameraPopupDisplay: {
+      display: 'none',
+      left: 0,
+      top: 0,
+    },
+    cameraPopupInfo: {},
+    deckSensorPopupDisplay: {
+      display: 'none',
+      left: 0,
+      top: 0,
+    },
+    deckSensorPopupInfo: {},
+  }
 
   componentDidMount = () => {
     this.setState({
@@ -48,113 +48,115 @@ class DeckView extends React.PureComponent {
       //height: this._element.current.clientHeight
       //}
     })
-  };
+  }
 
-  onDeckSelect = (deck) => {
+  onDeckSelect = deck => {
     let { dispatch } = this.props
     if (typeof deck !== 'undefined') {
       dispatch({
         type: 'SET_CUR_DECK',
         currentDeck: deck,
-      });
+      })
     }
-  };
+  }
 
-  onDeckViewClick = (e) => {
-      console.log(e.target.classList)
-      if(e.target.classList.contains("deckImage") ||
-          e.target.classList.contains("option") ||
-          e.target.classList.contains("functionItem")
-      ){
-          this.setState({
-              cameraPopupDisplay: {
-                  display: "none",
-                  left: 0,
-                  top: 0
-              },
-              cameraPopupInfo: {}
-          });
-          this.setState({
-              deckSensorPopupDisplay: {
-                  display: "none",
-                  left: 0,
-                  top: 0
-              },
-              deckSensorPopupInfo: {}
-          });
-      }
-  };
+  onDeckViewClick = e => {
+    console.log(e.target.classList)
+    if (
+      e.target.classList.contains('deckImage') ||
+      e.target.classList.contains('option') ||
+      e.target.classList.contains('functionItem')
+    ) {
+      this.setState({
+        cameraPopupDisplay: {
+          display: 'none',
+          left: 0,
+          top: 0,
+        },
+        cameraPopupInfo: {},
+      })
+      this.setState({
+        deckSensorPopupDisplay: {
+          display: 'none',
+          left: 0,
+          top: 0,
+        },
+        deckSensorPopupInfo: {},
+      })
+    }
+  }
 
   onDeviceClick = (accessInfo, e) => {
-      let { dispatch } = this.props;
-      switch(accessInfo.EquipmentTypeID) {
-          case 2: {
-              this.setState({
-                  cameraPopupDisplay: {
-                      display: "block",
-                      left: accessInfo.left,
-                      top: accessInfo.top
-                  },
-                  cameraPopupInfo: {
-
-                  }
-              });
-              break;
-          }
-          case 3: {
-              this.setState({
-                  cameraPopupDisplay: {
-                      display: "none",
-                      left: 0,
-                      top: 0
-                  },
-                  cameraPopupInfo: {}
-              });
-              let eventLogs = this.props.eventInfo.eventLogs;
-              getSecurityEventsByDeviceID(accessInfo, eventLogs, dispatch);
-              document.getElementById("root").style.cursor = "wait";
-              triggerManualEvent();
-              break;
-          }
-          case 5: {
-              this.setState({
-                  deckSensorPopupDisplay: {
-                      display: "block",
-                      left: accessInfo.left,
-                      top: accessInfo.top
-                  },
-                  deckSensorPopupInfo: {
-
-                  }
-              });
-              break;
-          }
+    let { dispatch } = this.props
+    switch (accessInfo.EquipmentTypeID) {
+      case 2: {
+        this.setState({
+          cameraPopupDisplay: {
+            display: 'block',
+            left: accessInfo.left,
+            top: accessInfo.top,
+          },
+          cameraPopupInfo: {},
+        })
+        break
       }
-
-  };
+      case 3: {
+        this.setState({
+          cameraPopupDisplay: {
+            display: 'none',
+            left: 0,
+            top: 0,
+          },
+          cameraPopupInfo: {},
+        })
+        let eventLogs = this.props.eventInfo.eventLogs
+        getSecurityEventsByDeviceID(accessInfo, eventLogs, dispatch)
+        document.getElementById('root').style.cursor = 'wait'
+        triggerManualEvent()
+        break
+      }
+      case 5: {
+        this.setState({
+          deckSensorPopupDisplay: {
+            display: 'block',
+            left: accessInfo.left,
+            top: accessInfo.top,
+          },
+          deckSensorPopupInfo: {},
+        })
+        break
+      }
+    }
+  }
 
   onResize = () => {
     console.log('resizing now')
-  };
+  }
 
   render() {
     let width = 0,
-      height = 0;
+      height = 0
     if (typeof this.divElement !== 'undefined') {
       //width = this.divElement.clientWidth
       //height = this.divElement.clientHeight
     }
-    let { border, cameraPopupDisplay, cameraPopupInfo, deckSensorPopupDisplay, deckSensorPopupInfo } = this.state;
-    let cornerImage = '';
+    let {
+      border,
+      cameraPopupDisplay,
+      cameraPopupInfo,
+      deckSensorPopupDisplay,
+      deckSensorPopupInfo,
+    } = this.state
+    let cornerImage = ''
     if (border === 'blue') {
       cornerImage = 'resources/images/background/blue-corner.png'
     }
-    let { currentDeck, decksArray } = this.props.decks;
-    let { devices, deckLocations, dispatch } = this.props;
+    let { currentDeck, decksArray } = this.props.decks
+    let { devices, deckLocations, dispatch } = this.props
     let deviceArray = devices.devicesArray
-    let deckLocationArray = deckLocations.deckLocationArray;
+    let deckLocationArray = deckLocations.deckLocationArray
     let curLocations = [],
-      curDevices = [];
+      curDevices = []
     if (
       typeof currentDeck !== 'undefined' &&
       !currentDeck.hasOwnProperty('DeckName') &&
@@ -179,10 +181,14 @@ class DeckView extends React.PureComponent {
       }
     })
     //let deckImage = 'resources/images/icons/SVG/Deck ' + currentDeck.DeckNumber + ' Schematic.svg'
-    let deckImage = 'resources/images/decks/deck' + currentDeck.DeckNumber + '.png';
+    let deckImage = 'resources/images/decks/deck' + currentDeck.DeckNumber + '.png'
 
     return (
-      <div className="DeckViewController" ref={divElement => (this.divElement = divElement)} onClick={this.onDeckViewClick}>
+      <div
+        className="DeckViewController"
+        ref={divElement => (this.divElement = divElement)}
+        onClick={this.onDeckViewClick}
+      >
         {currentDeck.hasOwnProperty('DeckName') ? (
           <img className={'deckImage'} src={deckImage} alt={currentDeck.DeckName} />
         ) : (
@@ -219,17 +225,17 @@ class DeckView extends React.PureComponent {
             EquipmentSubTypeID,
             LocationX,
             LocationY,
-          } = device;
+          } = device
           let left = LocationX * 100
           let top = 50 + LocationY * 50
           //let top = s_h/2 + LocationY * (467 * s_w/(1920*2));
-          let buttonImage = '';
-          let accessInfo = {};
+          let buttonImage = ''
+          let accessInfo = {}
           switch (EquipmentTypeID) {
             case 2: {
-              let currentCamera = this.props.devices.currentCamera;
-              let playbackCamera = this.props.urls.playbackCamera;
-              let isSelected = false;
+              let currentCamera = this.props.devices.currentCamera
+              let playbackCamera = this.props.urls.playbackCamera
+              let isSelected = false
               if (
                 typeof currentCamera !== 'undefined' &&
                 currentCamera.hasOwnProperty('DeviceName')
@@ -272,18 +278,18 @@ class DeckView extends React.PureComponent {
                   break
                 }
               }
-              accessInfo = device;
-              accessInfo.left = left;
-              accessInfo.top = top;
+              accessInfo = device
+              accessInfo.left = left
+              accessInfo.top = top
               break
             }
             case 3: {
-                if (typeof currentDeck === 'undefined' || !currentDeck.hasOwnProperty('DeckName'))
-                    return;
-                //console.log("currentDeck: ", current);
-                accessInfo = device;
-                accessInfo.enabled = true;
-                accessInfo.DeckName = currentDeck.DeckName;
+              if (typeof currentDeck === 'undefined' || !currentDeck.hasOwnProperty('DeckName'))
+                return
+              //console.log("currentDeck: ", current);
+              accessInfo = device
+              accessInfo.enabled = true
+              accessInfo.DeckName = currentDeck.DeckName
               switch (EquipmentSubTypeID) {
                 case 5: {
                   buttonImage = 'resources/images/decks/accessControlGreen.png'
@@ -300,9 +306,9 @@ class DeckView extends React.PureComponent {
               break
             }
             case 5: {
-              accessInfo = device;
-              accessInfo.left = left;
-              accessInfo.top = top;
+              accessInfo = device
+              accessInfo.left = left
+              accessInfo.top = top
               buttonImage = 'resources/images/decks/deckSensorGreen.png'
               break
             }
@@ -317,14 +323,8 @@ class DeckView extends React.PureComponent {
             </button>
           )
         })}
-        <CameraPopup
-            displayInfo={cameraPopupDisplay}
-            info={cameraPopupInfo}
-        />
-        <DeckSensorPopup
-          displayInfo={deckSensorPopupDisplay}
-          info={deckSensorPopupInfo}
-        />
+        <CameraPopup displayInfo={cameraPopupDisplay} info={cameraPopupInfo} />
+        <DeckSensorPopup displayInfo={deckSensorPopupDisplay} info={deckSensorPopupInfo} />
         <img src={cornerImage} className="cornerImage" alt="corner" />
       </div>
     )

@@ -9,7 +9,7 @@ let VideoConnectionSignal = {
 class accessStream {
   constructor(camera) {
     this.Id = camera.Id;
-
+    console.log("cameraId: ", this.Id);
     this.image = document.getElementById("accessPointCamera");
     if (this.image === null) return null;
     this.image.addEventListener('load', this.onImageLoad);
@@ -59,12 +59,12 @@ class accessStream {
    * Executed on received frame.
    */
   videoConnectionReceivedFrame = frame => {
-    if (!this.drawing && frame.dataSize > 0) {
+    if (this.image && !this.drawing && frame.dataSize > 0) {
       this.drawing = true
 
       if (frame.hasSizeInformation) {
         var multiplier =
-          frame.sizeInfo.destinationSize.resampling * mobileSDK.getResamplingFactor() || 1
+          frame.sizeInfo.destinationSize.resampling * mobileSDK.getResamplingFactor() || 1;
         this.image.width = multiplier * frame.sizeInfo.destinationSize.width
         this.image.height = multiplier * frame.sizeInfo.destinationSize.height
       }
@@ -107,39 +107,6 @@ class accessStream {
     }
   }
 
-  resetState = () => {
-    this.playbackSpeed = 0
-
-    if (this.streamRequest) {
-      mobileSDK.cancelRequest(this.streamRequest)
-      this.streamRequest = null
-    }
-  }
-
-  /**
-   * Switch camera to live video
-   */
-  switchToLive = () => {
-    if (this.isLive) return
-    this.loading = true
-    $('#cameraLoadingArea' + this.Id)[0].style.display = 'flex'
-
-    this.isLive = true
-
-    this.playBackTime = {}
-
-    this.stop()
-
-    this.resetState()
-
-    this.streamRequest = mobileSDK.requestStream(
-      this.Id,
-      this.destination,
-      null,
-      this.requestStreamCallback,
-      function(error) {},
-    )
-  }
 }
 
 export { accessStream }

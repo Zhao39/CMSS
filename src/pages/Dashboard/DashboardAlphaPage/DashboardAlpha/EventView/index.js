@@ -1,6 +1,7 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import eventLogData from './eventLog-example'
+import { getAllSecurityEvents } from "ducks/event";
 //import $ from 'jquery-ui'
 import './style.scss'
 
@@ -30,62 +31,69 @@ class EventView extends React.Component {
   componentDidMount() {}
 
   onSortClick = type => {
-    let { sortType, sortOrder } = this.state
+    let { sortType, sortOrder } = this.state;
+    let { dispatch } = this.props;
     if (sortType === type) {
+      getAllSecurityEvents(dispatch, type, 1 - sortOrder);
       this.setState({
         sortOrder: 1 - sortOrder,
-      })
+      });
     } else {
+      getAllSecurityEvents(dispatch, type, 1);
       this.setState({
         sortType: type,
         sortOrder: 1,
-      })
+      });
     }
-  }
+  };
 
   handleScroll = e => {
     var node = e.target;
     const bottom = node.scrollHeight - node.scrollTop - node.clientHeight;
     if (bottom < 10) {
-      let { limit_count } = this.state;
+      let { limit_count } = this.state
       this.setState({
         limit_count: limit_count + 100,
       })
     }
     console.log(bottom)
-  };
+  }
 
   render() {
-    let { border, sortType, sortOrder, limit_count } = this.state;
-    let cornerImage = '';
+    let { border, sortType, sortOrder, limit_count } = this.state
+    let cornerImage = ''
     if (border === 'blue') {
-      cornerImage = 'resources/images/background/blue-corner.png';
+      cornerImage = 'resources/images/background/blue-corner.png'
     }
-    let eventLogs = [] ;//eventLogData;//[];
-    let { eventInfo, devicesInfo, deckLocationsInfo } = this.props;
-    let eventArray = eventInfo.eventLogs;
-    let devicesArray = devicesInfo.devicesArray;
-    let deckLocationArray = deckLocationsInfo.deckLocationArray;
-    let count = limit_count > eventArray.length ? eventArray.length : limit_count;
-    let cur_eventArray = eventArray.slice(0, count);
+    let eventLogs = [] //eventLogData;//[];
+    let { eventInfo, devicesInfo, deckLocationsInfo } = this.props
+    let eventArray = eventInfo.eventLogs
+    let devicesArray = devicesInfo.devicesArray
+    let deckLocationArray = deckLocationsInfo.deckLocationArray
+    let count = limit_count > eventArray.length ? eventArray.length : limit_count
+    let cur_eventArray = eventArray.slice(0, count)
     cur_eventArray.forEach(event => {
-      let row = {};
-      row.eventType = event.EventMsg.toUpperCase();
+      let row = {}
+      row.eventType = event.EventMsg.toUpperCase()
       row.datetime = new Date(event.DateTime)
         .toLocaleString('en-GB', { timeZone: 'UTC' })
-        .replace(',', '');
-      row.device = event.SecurityDevice.DeviceName.toUpperCase();
-      row.location = event.SecurityDevice.DeckLocation.LocationName.toUpperCase();
-      let type_temp = row.eventType.split(' ');
-      if(type_temp.includes("GRANTED")) {
-          row.type = "green";
-      } else if(type_temp.includes("SENSOR") || type_temp.includes("DETECTED") || type_temp.includes("MOTION")) {
-          row.type = "red";
+        .replace(',', '')
+      row.device = event.SecurityDevice.DeviceName.toUpperCase()
+      row.location = event.SecurityDevice.DeckLocation.LocationName.toUpperCase()
+      let type_temp = row.eventType.split(' ')
+      if (type_temp.includes('GRANTED')) {
+        row.type = 'green'
+      } else if (
+        type_temp.includes('SENSOR') ||
+        type_temp.includes('DETECTED') ||
+        type_temp.includes('MOTION')
+      ) {
+        row.type = 'red'
       } else {
-          row.type = "blue";
+        row.type = 'blue'
       }
-      eventLogs.push(row);
-    });
+      eventLogs.push(row)
+    })
 
     switch (sortType) {
       case 'eventType': {

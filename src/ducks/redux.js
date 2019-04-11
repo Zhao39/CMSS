@@ -1,6 +1,6 @@
 const rootReducer = {
-    serverUrl: 'http://localhost:9001',
-    adaptorServerUrl: 'http://localhost:9003'
-}
+  serverUrl: 'http://192.168.1.66:9001',
+  adaptorServerUrl: 'http://192.168.1.66:9003',
+};
 
-export default rootReducer;
+export default rootReducer

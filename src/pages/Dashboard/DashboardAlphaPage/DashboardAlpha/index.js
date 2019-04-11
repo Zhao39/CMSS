@@ -100,16 +100,16 @@ class DashboardAlpha extends React.PureComponent {
       cameraViews: cameraViews,
     })
 
-    getAllDecks(dispatch);
-    getAllDevices(dispatch);
-    getAllDeckLocations(dispatch);
-    getAllDeckZones(dispatch);
-    getAllSecurityEvents(dispatch);
-    let items = [];
-    const camera_count = cameras.length;
-    const cols = 3;
-    const w = 3;
-    const h = 2;
+    getAllDecks(dispatch)
+    getAllDevices(dispatch)
+    getAllDeckLocations(dispatch)
+    getAllDeckZones(dispatch)
+    getAllSecurityEvents(dispatch)
+    let items = []
+    const camera_count = cameras.length
+    const cols = 3
+    const w = 3
+    const h = 2
     if (camera_count > 0) {
       for (let i = 0; i < camera_count; i++) {
         items.push({
