@@ -31,46 +31,46 @@ class TopMenu extends React.Component {
     cameraExpand: -1,
     accessDeckExpand: -1,
     deckSensorExpand: -1,
-    securitySettingDisplay: 'none'
-  };
+    securitySettingDisplay: 'none',
+  }
 
   selectPlayback = (camera, cameras, e) => {
-    let deviceName = camera.DeviceName;
+    let deviceName = camera.DeviceName
     let playbackCamera = cameras.find(camera => {
-      return camera.Name === deviceName;
-    });
-    let { dispatch, widgetInfo, addPlaybackView } = this.props;
+      return camera.Name === deviceName
+    })
+    let { dispatch, widgetInfo, addPlaybackView } = this.props
     if (typeof playbackCamera !== 'undefined') {
       dispatch({
         type: 'SET_PLAYBACK',
         playbackCamera: playbackCamera,
-      });
+      })
       dispatch({
         type: 'SET_CUR_CAMERA',
         currentCamera: {},
-      });
+      })
     }
-    let visible = widgetInfo.playbackView.visible;
+    let visible = widgetInfo.playbackView.visible
     if (!visible) {
-      addPlaybackView();
+      addPlaybackView()
     }
     dispatch({
       type: 'SET_PLAYBACK_VIDEO_DOWNLOAD',
       videoInfo: {},
-    });
-  };
+    })
+  }
 
   selectDeck = (deck, shown) => {
-    console.log('currentDeck: ', deck);
-    let { dispatch, addDeckView } = this.props;
+    console.log('currentDeck: ', deck)
+    let { dispatch, addDeckView } = this.props
     if (typeof deck !== 'undefined') {
       dispatch({
         type: 'SET_CUR_DECK',
         currentDeck: deck,
-      });
+      })
     }
     if (!shown) {
-      addDeckView();
+      addDeckView()
     }
     let accessInfo = {
       enabled: false,
@@ -80,124 +80,124 @@ class TopMenu extends React.Component {
       },
       clearance: 0,
       cameraId: '',
-    };
+    }
     dispatch({
       type: 'CLEAR_ACCESS',
       accessInfo: accessInfo,
-    });
-  };
+    })
+  }
 
   onCameraSelect = (cameraId, visible) => {
-    let { dispatch, addCameraView } = this.props;
+    let { dispatch, addCameraView } = this.props
     if (!visible) {
-      this.props.addCameraView(cameraId);
+      this.props.addCameraView(cameraId)
     }
-  };
+  }
 
   onPlaybackExpand = index => {
-    let { playbackExpand } = this.state;
+    let { playbackExpand } = this.state
     if (index === playbackExpand) {
       this.setState({
         playbackExpand: -1,
-      });
+      })
     } else {
       this.setState({
         playbackExpand: index,
-      });
+      })
     }
-  };
+  }
 
   onAccessDeckExpand = index => {
-    let { accessDeckExpand } = this.state;
+    let { accessDeckExpand } = this.state
     if (index === accessDeckExpand) {
       this.setState({
         accessDeckExpand: -1,
-      });
+      })
     } else {
       this.setState({
         accessDeckExpand: index,
-      });
+      })
     }
-  };
+  }
 
   onCameraExpand = index => {
-    let { cameraExpand } = this.state;
+    let { cameraExpand } = this.state
     if (index === cameraExpand) {
       this.setState({
         cameraExpand: -1,
-      });
+      })
     } else {
       this.setState({
         cameraExpand: index,
-      });
+      })
     }
-  };
+  }
 
   onAccessMenuClick = accessInfo => {
-    let { dispatch } = this.props;
-    console.log('accessInfo: ', accessInfo);
-    if (accessInfo.EquipmentTypeID !== 3) return;
-    let eventLogs = this.props.eventInfo.eventLogs;
-    getSecurityEventsByDeviceID(accessInfo, eventLogs, dispatch);
-    document.getElementById('root').style.cursor = 'wait';
-    triggerManualEvent();
-  };
+    let { dispatch } = this.props
+    console.log('accessInfo: ', accessInfo)
+    if (accessInfo.EquipmentTypeID !== 3) return
+    let eventLogs = this.props.eventInfo.eventLogs
+    getSecurityEventsByDeviceID(accessInfo, eventLogs, dispatch)
+    document.getElementById('root').style.cursor = 'wait'
+    triggerManualEvent()
+  }
 
   onDeckSensorDropDownClick = index => {
-    let { deckSensorExpand } = this.state;
-    let tempIndex = -1;
+    let { deckSensorExpand } = this.state
+    let tempIndex = -1
     if (deckSensorExpand !== index) {
-      tempIndex = index;
+      tempIndex = index
     }
     this.setState({
       deckSensorExpand: tempIndex,
-    });
-  };
+    })
+  }
 
   onEventItemClick = type => {
-    console.log(type);
-    let { addEventView, removeView } = this.props;
+    console.log(type)
+    let { addEventView, removeView } = this.props
     if (type === 0) {
-      addEventView();
+      addEventView()
     }
     if (type === 1) {
-      removeView('eventView');
+      removeView('eventView')
     }
-  };
+  }
 
   openSecuritySettingView = () => {
-      this.setState({
-          securitySettingDisplay: 'block'
-      });
-  };
+    this.setState({
+      securitySettingDisplay: 'block',
+    })
+  }
 
   closeSecuritySetting = () => {
     this.setState({
-        securitySettingDisplay: 'none'
-    });
-  };
+      securitySettingDisplay: 'none',
+    })
+  }
 
   render() {
     let { decks, devices, deckLocations, urls, accessInfo, deckZonesInfo, systemInfo } = this.props
-    let deckZones;
+    let deckZones
     if (deckZonesInfo.deckZones) {
-      deckZones = deckZonesInfo.deckZones;
+      deckZones = deckZonesInfo.deckZones
     }
-    let { securitySettingDisplay } = this.state;
-    let securityLevel = systemInfo.systemSecurityLevel;
-    let solarisLogo = 'resources/images/logo/4.png';
-    let customViewImage = 'resources/images/icons/SVG/View Layout Icon.svg';
-    let deckViewImage = 'resources/images/icons/SVG/Deck Select Icon.svg';
-    let volumeImage = 'resources/images/icons/SVG/Sound On Icon.svg';
-    let cameraViewImage = 'resources/images/icons/SVG/Cam Generic Icon.svg';
-    let camLiftImage = 'resources/images/icons/SVG/Cam Lift Icon.svg';
-    let playbackImage = 'resources/images/icons/SVG/Playback Icon.svg';
-    let accessControlImage = 'resources/images/icons/SVG/Access Control Icon.svg';
-    let deckSensorImage = 'resources/images/icons/SVG/Deck Sensor Icon.svg';
-    let droneImage = 'resources/images/icons/SVG/Drone Icon.svg';
-    let eventLogImage = 'resources/images/icons/SVG/Event Log Icon.svg';
-    let palladiumLogoImage = 'resources/images/icons/SVG/Palladium Logo.svg';
-    let securityLevelImage = 'resources/images/icons/SVG/' + securityLevel + '.svg';
+    let { securitySettingDisplay } = this.state
+    let securityLevel = systemInfo.systemSecurityLevel
+    let solarisLogo = 'resources/images/logo/4.png'
+    let customViewImage = 'resources/images/icons/SVG/View Layout Icon.svg'
+    let deckViewImage = 'resources/images/icons/SVG/Deck Select Icon.svg'
+    let volumeImage = 'resources/images/icons/SVG/Sound On Icon.svg'
+    let cameraViewImage = 'resources/images/icons/SVG/Cam Generic Icon.svg'
+    let camLiftImage = 'resources/images/icons/SVG/Cam Lift Icon.svg'
+    let playbackImage = 'resources/images/icons/SVG/Playback Icon.svg'
+    let accessControlImage = 'resources/images/icons/SVG/Access Control Icon.svg'
+    let deckSensorImage = 'resources/images/icons/SVG/Deck Sensor Icon.svg'
+    let droneImage = 'resources/images/icons/SVG/Drone Icon.svg'
+    let eventLogImage = 'resources/images/icons/SVG/Event Log Icon.svg'
+    let palladiumLogoImage = 'resources/images/icons/SVG/Palladium Logo.svg'
+    let securityLevelImage = 'resources/images/icons/SVG/' + securityLevel + '.svg'
     return (
       <div className="topMenu">
         <ul className="nav" style={{ height: '4rem' }}>
@@ -301,7 +301,7 @@ class TopMenu extends React.Component {
             />
           </li>
         </ul>
-        <SecuritySetting display={securitySettingDisplay} onClose={this.closeSecuritySetting}/>
+        <SecuritySetting display={securitySettingDisplay} onClose={this.closeSecuritySetting} />
       </div>
     )
   }

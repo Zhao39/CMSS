@@ -1,6 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 import { connect } from 'react-redux'
+import $ from 'jquery'
 import './style.scss'
 
 const mapStateToProps = (state, props) => ({
@@ -44,13 +45,15 @@ class DeckSensorPopup extends React.Component {
         let {display, left, top} = displayInfo;
         let { expandedList } = this.state;
         let deckZones = deckZonesInfo.deckZones;
+        let deckView = $("#DeckViewController");
+        let absolute_top = typeof deckView.parents()[1] !== 'undefined'?$(deckView.parents()[1]).position().top:0;
         return (
             <div
                 className={"DeckSensorPopup"}
                 style={{
                     display: display,
                     left: (left + 15 < 100)?left + 1 + "%":left - 16 + "%",
-                    top: top - 100 + "%"
+                    top: absolute_top < 100?top + 5 + "%":top - 100 + "%"
                 }}
             >
                 <div className={"caption"}>
