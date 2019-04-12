@@ -1,7 +1,7 @@
 import axios from 'axios'
 import rootReducer from './redux'
 
-const INITIAL_STATE = { systemSecurityLevel: 'Security Level -1' }
+const INITIAL_STATE = { systemSecurityLevel: 'none' }
 
 export default function(state = INITIAL_STATE, action) {
   switch (action.type) {
