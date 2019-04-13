@@ -8,47 +8,47 @@ import * as app from 'ducks/app'
 import { triggerManualEvent } from 'ducks/Milestone'
 import rootReducer from 'ducks/redux'
 
-const FormItem = Form.Item;
+const FormItem = Form.Item
 
 const mapStateToProps = (state, props) => ({
   isSubmitForm: state.app.submitForms[REDUCER],
-});
+})
 
-let socketUrl = rootReducer.socketUrl;
+let socketUrl = rootReducer.socketUrl
 
 @connect(mapStateToProps)
 @Form.create()
 class LoginForm extends React.Component {
-  static defaultProps = {};
+  static defaultProps = {}
 
   state = {
     title: 'LOGIN',
     submit: 'LOGIN',
-  };
+  }
 
-  ws = new WebSocket(socketUrl);
-  socketOpened = false;
+  ws = new WebSocket(socketUrl)
+  socketOpened = false
 
   componentDidMount() {
     this.ws.onopen = () => {
-      console.log('opened');
+      console.log('opened')
       this.socketOpened = true
-    };
+    }
 
     this.ws.onmessage = evt => {
-      var received_msg = evt.data;
-      let temp_array = received_msg.split('<');
+      var received_msg = evt.data
+      let temp_array = received_msg.split('<')
       if (temp_array.length > 1) {
-        let command = temp_array[1].slice(0, -1);
-        let { dispatch } = this.props;
+        let command = temp_array[1].slice(0, -1)
+        let { dispatch } = this.props
         switch (command) {
           case 'UserLogon': {
             if (temp_array.length === 8) {
-              cookie.save('UserName', temp_array[2].slice(0, -1));
-              cookie.save('Password', temp_array[3].slice(0, -1));
-              cookie.save('MilestoneUser', temp_array[5].slice(0, -1));
-              cookie.save('MilestonePassword', temp_array[6].slice(0, -1));
-              cookie.save('UserSecurityClearance', temp_array[7].slice(0, -1));
+              cookie.save('UserName', temp_array[2].slice(0, -1))
+              cookie.save('Password', temp_array[3].slice(0, -1))
+              cookie.save('MilestoneUser', temp_array[5].slice(0, -1))
+              cookie.save('MilestonePassword', temp_array[6].slice(0, -1))
+              cookie.save('UserSecurityClearance', temp_array[7].slice(0, -1))
               dispatch(
                 submit({
                   username: temp_array[5].slice(0, -1),
@@ -56,7 +56,7 @@ class LoginForm extends React.Component {
                 }),
               )
               //Get System Info
-              let data = '<GetSystemInfo>';
+              let data = '<GetSystemInfo>'
               this.ws.send(data)
             } else {
               message.error('Invalid username or password')
@@ -64,55 +64,55 @@ class LoginForm extends React.Component {
             break
           }
           case 'GetSystemInfo': {
-            let result = temp_array[2].slice(0, -1);
+            let result = temp_array[2].slice(0, -1)
             if (result === 'OK') {
-              let systemSecurityLevel = 'Security Level -1';
+              let systemSecurityLevel = 'Security Level -1'
               if (temp_array.length === 8) {
-                systemSecurityLevel = temp_array[5].slice(0, -1);
+                systemSecurityLevel = temp_array[5].slice(0, -1)
               }
               dispatch({
                 type: 'SET_System_Security_Level',
                 systemSecurityLevel: systemSecurityLevel,
-              });
-              cookie.save('SecurityLevelId', temp_array[4].slice(0, -1));
-              cookie.save('SecurityLevelImage', temp_array[5].slice(0, -1));
+              })
+              cookie.save('SecurityLevelId', temp_array[4].slice(0, -1))
+              cookie.save('SecurityLevelImage', temp_array[5].slice(0, -1))
               //Check User Permission
-              let userName = cookie.load('UserName');
-              let password = cookie.load('Password');
+              let userName = cookie.load('UserName')
+              let password = cookie.load('Password')
               let permission_info =
                 '<UserCheckPermission><' +
                 userName +
                 '><' +
                 password +
-                '><Modify System Security Level>';
+                '><Modify System Security Level>'
               this.ws.send(permission_info)
             } else {
-              message.error('YOU CAN NOT GET SYSTEM SECURITY LEVEL');
+              message.error('YOU CAN NOT GET SYSTEM SECURITY LEVEL')
             }
             break
           }
           case 'UserCheckPermission': {
             if (temp_array.length === 7) {
-              let permission_type = temp_array[4].slice(0, -1);
+              let permission_type = temp_array[4].slice(0, -1)
               if (permission_type === 'Modify System Security Level') {
-                let result = temp_array[5].slice(0, -1);
+                let result = temp_array[5].slice(0, -1)
                 if (result === 'OK') {
-                  cookie.save('SystemSecurityLevel', 'Modify System Security Level');
+                  cookie.save('SystemSecurityLevel', 'Modify System Security Level')
                 } else {
-                  cookie.save('SystemSecurityLevel', 'Invalid');
+                  cookie.save('SystemSecurityLevel', 'Invalid')
                 }
 
-                let userName = cookie.load('UserName');
-                let password = cookie.load('Password');
+                let userName = cookie.load('UserName')
+                let password = cookie.load('Password')
                 let permission_info =
                   '<UserCheckPermission><' +
                   userName +
                   '><' +
                   password +
-                  '><Modify Camera Motion Detection>';
+                  '><Modify Camera Motion Detection>'
                 this.ws.send(permission_info)
               } else if (permission_type === 'Modify Camera Motion Detection') {
-                let result = temp_array[5].slice(0, -1);
+                let result = temp_array[5].slice(0, -1)
                 if (result === 'OK') {
                   cookie.save('CameraMotionDetection', 'Modify Camera Motion Detection')
                 } else {
@@ -128,34 +128,34 @@ class LoginForm extends React.Component {
 
     this.ws.onclose = () => {
       // websocket is closed.
-      console.log('Connection is closed...');
-      this.socketOpened = false;
-      document.getElementById('root').style.cursor = 'default';
-      triggerManualEvent();
+      console.log('Connection is closed...')
+      this.socketOpened = false
+      document.getElementById('root').style.cursor = 'default'
+      triggerManualEvent()
     }
   }
 
   openSocket = data => {
-    this.ws = new WebSocket(socketUrl);
+    this.ws = new WebSocket(socketUrl)
     this.ws.onopen = () => {
-      console.log('opened');
-      this.socketOpened = true;
+      console.log('opened')
+      this.socketOpened = true
       this.ws.send(data)
     }
     this.ws.onmessage = evt => {
-      var received_msg = evt.data;
-      let temp_array = received_msg.split('<');
+      var received_msg = evt.data
+      let temp_array = received_msg.split('<')
       if (temp_array.length > 1) {
-        let command = temp_array[1].slice(0, -1);
-        let { dispatch } = this.props;
+        let command = temp_array[1].slice(0, -1)
+        let { dispatch } = this.props
         switch (command) {
           case 'UserLogon': {
             if (temp_array.length === 8) {
-              cookie.save('UserName', temp_array[2].slice(0, -1));
-              cookie.save('Password', temp_array[3].slice(0, -1));
-              cookie.save('MilestoneUser', temp_array[5].slice(0, -1));
-              cookie.save('MilestonePassword', temp_array[6].slice(0, -1));
-              cookie.save('UserSecurityClearance', temp_array[7].slice(0, -1));
+              cookie.save('UserName', temp_array[2].slice(0, -1))
+              cookie.save('Password', temp_array[3].slice(0, -1))
+              cookie.save('MilestoneUser', temp_array[5].slice(0, -1))
+              cookie.save('MilestonePassword', temp_array[6].slice(0, -1))
+              cookie.save('UserSecurityClearance', temp_array[7].slice(0, -1))
               dispatch(
                 submit({
                   username: temp_array[5].slice(0, -1),
@@ -163,7 +163,7 @@ class LoginForm extends React.Component {
                 }),
               )
               //Get System Info
-              let data = '<GetSystemInfo>';
+              let data = '<GetSystemInfo>'
               this.ws.send(data)
             } else {
               message.error('Invalid username or password')
@@ -171,30 +171,30 @@ class LoginForm extends React.Component {
             break
           }
           case 'GetSystemInfo': {
-            let result = temp_array[2].slice(0, -1);
+            let result = temp_array[2].slice(0, -1)
             if (result === 'OK') {
-              let systemSecurityLevel = 'Security Level -1';
+              let systemSecurityLevel = 'Security Level -1'
               if (temp_array.length === 8) {
-                systemSecurityLevel = temp_array[5].slice(0, -1);
+                systemSecurityLevel = temp_array[5].slice(0, -1)
               }
               dispatch({
                 type: 'SET_System_Security_Level',
                 systemSecurityLevel: systemSecurityLevel,
               })
-              cookie.save('SecurityLevelId', temp_array[4].slice(0, -1));
-              cookie.save('SecurityLevelImage', temp_array[5].slice(0, -1));
+              cookie.save('SecurityLevelId', temp_array[4].slice(0, -1))
+              cookie.save('SecurityLevelImage', temp_array[5].slice(0, -1))
               //Check User Permission
-              let userName = cookie.load('UserName');
-              let password = cookie.load('Password');
+              let userName = cookie.load('UserName')
+              let password = cookie.load('Password')
               let permission_info =
                 '<UserCheckPermission><' +
                 userName +
                 '><' +
                 password +
-                '><Modify System Security Level>';
-              this.ws.send(permission_info);
+                '><Modify System Security Level>'
+              this.ws.send(permission_info)
             } else {
-              message.error('YOU CAN NOT GET SYSTEM SECURITY LEVEL');
+              message.error('YOU CAN NOT GET SYSTEM SECURITY LEVEL')
             }
             break
           }
