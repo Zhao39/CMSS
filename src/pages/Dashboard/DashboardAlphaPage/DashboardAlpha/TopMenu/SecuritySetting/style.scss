@@ -14,14 +14,14 @@
   z-index: 100;
   .SecurityNumberArea {
     display: flex;
-    width: 80%;
+    width: 90%;
     height: 160px;
-    margin-left: 10%;
+    margin-left: 5%;
     margin-top: 100px;
     .NumberButton {
       display: inline-flex;
       height: 100%;
-      width: 33.33%;
+      width: 20%;
       align-items: center;
       justify-content: center;
       font-size: 100px;
@@ -49,10 +49,16 @@
       color: #0086FF;
     }
     .second {
-      color: #4F502E;
+      color: #00FF91;
     }
     .third {
-      color: #FE0000;
+      color: #FFFB7D;
+    }
+    .fourth {
+      color: #FFA161;
+    }
+    .fifth {
+      color: #FF0000;
     }
   }
   .buttonArea {

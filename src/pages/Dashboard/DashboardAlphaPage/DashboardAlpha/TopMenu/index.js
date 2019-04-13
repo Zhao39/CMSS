@@ -3,8 +3,11 @@ import { connect } from 'react-redux'
 import { getSecurityEventsByDeviceID } from 'ducks/logHistory'
 import { triggerManualEvent } from 'ducks/Milestone'
 import SecuritySetting from './SecuritySetting'
+import LoginView from './Login'
+import rootReducer from 'ducks/redux'
 import cookie from 'react-cookie'
 import './style.scss'
+import {message} from "antd";
 
 const mapStateToProps = (state, props) => ({
     urls: state.urls,
@@ -16,27 +19,210 @@ const mapStateToProps = (state, props) => ({
     deckZonesInfo: state.deckZonesInfo,
     eventInfo: state.eventInfo,
     systemInfo: state.systemInfo,
-})
+});
 
 const mapDispatchToProps = (dispatch, props) => ({
     dispatch: dispatch,
-})
+});
+
+let socketUrl = rootReducer.socketUrl;
 
 @connect(
     mapStateToProps,
     mapDispatchToProps,
 )
+
 class TopMenu extends React.Component {
     state = {
         playbackExpand: -1,
         cameraExpand: -1,
         accessDeckExpand: -1,
         deckSensorExpand: -1,
+        loginViewDisplay: 'none',
         securitySettingDisplay: 'none',
+        userName: '',
+        password: ''
+    };
+
+    ws = new WebSocket(socketUrl);
+    socketOpened = false;
+
+    componentDidMount() {
+        this.ws.onopen = () => {
+            console.log('opened');
+            this.socketOpened = true
+        };
+
+        this.ws.onmessage = evt => {
+            console.log("receive mag", evt.data);
+            var received_msg = evt.data;
+            let result_array = received_msg.split('<');
+            if (result_array.length > 1) {
+                let command_type = result_array[1].slice(0, -1);
+                switch (command_type) {
+                    case 'UserCheckPermission': {
+                        if (result_array.length === 7) {
+                            let result = result_array[5].slice(0, -1)
+                            if (result === 'OK') {
+                                this.setState({
+                                    securitySettingDisplay: 'block'
+                                });
+                            } else {
+                                message.error("User has no permission for setting system security level.");
+                            }
+                        }
+                        document.getElementById('root').style.cursor = 'default';
+                        break;
+                    }
+                    case 'UserChangeSecurityLevel': {
+                        if (result_array.length === 6) {
+                            let result = result_array[5].slice(0, -1);
+                            if (result === 'OK') {
+                                let data = '<GetSystemInfo>';
+                                this.ws.send(data);
+                            }
+                        }
+                        break;
+                    }
+                    case 'GetSystemInfo': {
+                        console.log("GetSystemInfo: ", received_msg)
+                        if (result_array.length === 8) {
+                            let securityLevel = result_array[5].slice(0, -1);
+                            let result = result_array[2].slice(0, -1);
+                            if (result === 'OK') {
+                                let { dispatch } = this.props;
+                                dispatch({
+                                    type: 'SET_System_Security_Level',
+                                    systemSecurityLevel: securityLevel,
+                                });
+                                cookie.save('SecurityLevelId', result_array[4].slice(0, -1));
+                                cookie.save('SecurityLevelImage', result_array[5].slice(0, -1));
+                            }
+                            document.getElementById('root').style.cursor = 'default';
+                        }
+                        break;
+                    }
+                    case 'SystemInfo': {
+                        console.log("SystemInfo: ", received_msg)
+                        if (result_array.length === 8) {
+                            let securityLevel = result_array[5].slice(0, -1);
+                            let result = result_array[2].slice(0, -1);
+                            if (result === 'OK') {
+                                let { dispatch } = this.props;
+                                dispatch({
+                                    type: 'SET_System_Security_Level',
+                                    systemSecurityLevel: securityLevel,
+                                });
+                                cookie.save('SecurityLevelId', result_array[4].slice(0, -1));
+                                cookie.save('SecurityLevelImage', result_array[5].slice(0, -1));
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+
+        this.ws.onclose = () => {
+            // websocket is closed.
+            console.log('Connection is closed...')
+            this.socketOpened = false
+            document.getElementById('root').style.cursor = 'default'
+        }
     }
 
+    openSocket = () => {
+        this.ws.onopen = () => {
+            console.log('opened');
+            this.socketOpened = true
+        };
+
+        this.ws.onmessage = evt => {
+            console.log("receive mag", evt.data);
+            var received_msg = evt.data;
+            let result_array = received_msg.split('<');
+            if (result_array.length > 1) {
+                let command_type = result_array[1].slice(0, -1);
+                switch (command_type) {
+                    case 'UserCheckPermission': {
+                        if (result_array.length === 7) {
+                            let result = result_array[5].slice(0, -1)
+                            if (result === 'OK') {
+                                this.setState({
+                                    securitySettingDisplay: 'block'
+                                });
+                            } else {
+                                message.error("User has no permission for setting system security level.");
+                            }
+                        }
+                        document.getElementById('root').style.cursor = 'default';
+                        break;
+                    }
+                    case 'UserChangeSecurityLevel': {
+                        if (result_array.length === 6) {
+                            let result = result_array[5].slice(0, -1);
+                            if (result === 'OK') {
+                                let data = '<GetSystemInfo>';
+                                this.ws.send(data);
+                            }
+                        }
+                        break;
+                    }
+                    case 'GetSystemInfo': {
+                        console.log("GetSystemInfo: ", received_msg)
+                        if (result_array.length === 8) {
+                            let securityLevel = result_array[5].slice(0, -1);
+                            let result = result_array[2].slice(0, -1);
+                            if (result === 'OK') {
+                                let { dispatch } = this.props;
+                                dispatch({
+                                    type: 'SET_System_Security_Level',
+                                    systemSecurityLevel: securityLevel,
+                                });
+                                cookie.save('SecurityLevelId', result_array[4].slice(0, -1));
+                                cookie.save('SecurityLevelImage', result_array[5].slice(0, -1));
+                            }
+                            document.getElementById('root').style.cursor = 'default';
+                        }
+                        break;
+                    }
+                    case 'SystemInfo': {
+                        console.log("SystemInfo: ", received_msg)
+                        if (result_array.length === 8) {
+                            let securityLevel = result_array[5].slice(0, -1);
+                            let result = result_array[2].slice(0, -1);
+                            if (result === 'OK') {
+                                let { dispatch } = this.props;
+                                dispatch({
+                                    type: 'SET_System_Security_Level',
+                                    systemSecurityLevel: securityLevel,
+                                });
+                                cookie.save('SecurityLevelId', result_array[4].slice(0, -1));
+                                cookie.save('SecurityLevelImage', result_array[5].slice(0, -1));
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+
+        this.ws.onclose = () => {
+            // websocket is closed.
+            console.log('Connection is closed...')
+            this.socketOpened = false
+            document.getElementById('root').style.cursor = 'default'
+        }
+
+        setTimeout(() => {
+            if (!this.socketOpened) {
+                //message.error('Cannot connect to Safety and Security System.');
+            }
+        }, 2000);
+    };
+
     selectPlayback = (camera, cameras, e) => {
-        let deviceName = camera.DeviceName
+        let deviceName = camera.DeviceName;
         let playbackCamera = cameras.find(camera => {
             return camera.Name === deviceName
         })
@@ -89,14 +275,14 @@ class TopMenu extends React.Component {
     }
 
     onCameraSelect = (cameraId, visible) => {
-        let { dispatch, addCameraView } = this.props
+        let { dispatch, addCameraView } = this.props;
         if (!visible) {
-            this.props.addCameraView(cameraId)
+            this.props.addCameraView(cameraId);
         }
-    }
+    };
 
     onPlaybackExpand = index => {
-        let { playbackExpand } = this.state
+        let { playbackExpand } = this.state;
         if (index === playbackExpand) {
             this.setState({
                 playbackExpand: -1,
@@ -153,11 +339,11 @@ class TopMenu extends React.Component {
         this.setState({
             deckSensorExpand: tempIndex,
         })
-    }
+    };
 
     onEventItemClick = type => {
-        console.log(type)
-        let { addEventView, removeView } = this.props
+        console.log(type);
+        let { addEventView, removeView } = this.props;
         if (type === 0) {
             addEventView()
         }
@@ -166,39 +352,60 @@ class TopMenu extends React.Component {
         }
     }
 
-    openSecuritySettingView = () => {
+    openLoginView = () => {
+        if (!this.socketOpened) {
+            this.openSocket();
+            message.error("Socket is disconnected! ...Please try again.");
+        } else {
+            this.setState({
+                loginViewDisplay: 'block',
+            })
+        }
+    };
+
+    openSecuritySettingView = (userName, password) => {
         this.setState({
-            securitySettingDisplay: 'block',
-        })
-    }
+            userName: userName,
+            password: password
+        });
+    };
 
     closeSecuritySetting = () => {
         this.setState({
             securitySettingDisplay: 'none',
-        })
-    }
+        });
+    };
+
+    closeLoginView = () => {
+        this.setState({
+            loginViewDisplay: 'none',
+        });
+    };
 
     render() {
         let { decks, devices, deckLocations, urls, accessInfo, deckZonesInfo, systemInfo } = this.props
-        let deckZones
+        let deckZones;
         if (deckZonesInfo.deckZones) {
-            deckZones = deckZonesInfo.deckZones
+            deckZones = deckZonesInfo.deckZones;
         }
-        let { securitySettingDisplay } = this.state;
-        let securityLevel = systemInfo.systemSecurityLevel !== 'none'?systemInfo.systemSecurityLevel:cookie.load("SecurityLevelImage");
-        let solarisLogo = 'resources/images/logo/4.png';
-        let customViewImage = 'resources/images/icons/SVG/View Layout Icon.svg';
-        let deckViewImage = 'resources/images/icons/SVG/Deck Select Icon.svg';
-        let volumeImage = 'resources/images/icons/SVG/Sound On Icon.svg';
-        let cameraViewImage = 'resources/images/icons/SVG/Cam Generic Icon.svg';
-        let camLiftImage = 'resources/images/icons/SVG/Cam Lift Icon.svg';
-        let playbackImage = 'resources/images/icons/SVG/Playback Icon.svg';
-        let accessControlImage = 'resources/images/icons/SVG/Access Control Icon.svg';
-        let deckSensorImage = 'resources/images/icons/SVG/Deck Sensor Icon.svg';
-        let droneImage = 'resources/images/icons/SVG/Drone Icon.svg';
-        let eventLogImage = 'resources/images/icons/SVG/Event Log Icon.svg';
-        let palladiumLogoImage = 'resources/images/icons/SVG/Palladium Logo.svg';
-        let securityLevelImage = 'resources/images/icons/SVG/' + securityLevel;
+        let { securitySettingDisplay, loginViewDisplay, userName, password } = this.state
+        let securityLevel =
+            systemInfo.systemSecurityLevel !== 'none'
+                ? systemInfo.systemSecurityLevel
+                : cookie.load('SecurityLevelImage')
+        let solarisLogo = 'resources/images/logo/4.png'
+        let customViewImage = 'resources/images/icons/SVG/View Layout Icon.svg'
+        let deckViewImage = 'resources/images/icons/SVG/Deck Select Icon.svg'
+        let volumeImage = 'resources/images/icons/SVG/Sound On Icon.svg'
+        let cameraViewImage = 'resources/images/icons/SVG/Cam Generic Icon.svg'
+        let camLiftImage = 'resources/images/icons/SVG/Cam Lift Icon.svg'
+        let playbackImage = 'resources/images/icons/SVG/Playback Icon.svg'
+        let accessControlImage = 'resources/images/icons/SVG/Access Control Icon.svg'
+        let deckSensorImage = 'resources/images/icons/SVG/Deck Sensor Icon.svg'
+        let droneImage = 'resources/images/icons/SVG/Drone Icon.svg'
+        let eventLogImage = 'resources/images/icons/SVG/Event Log Icon.svg'
+        let palladiumLogoImage = 'resources/images/icons/SVG/Palladium Logo.svg'
+        let securityLevelImage = 'resources/images/icons/SVG/' + securityLevel
         return (
             <div className="topMenu">
                 <ul className="nav" style={{ height: '4rem' }}>
@@ -294,7 +501,7 @@ class TopMenu extends React.Component {
                         />
                         <DropDown type={'PALLADIUM TECHNOLOGIES'} />
                     </li>
-                    <li className={'securityLavel'} onClick={this.openSecuritySettingView}>
+                    <li className={'securityLavel'} onClick={this.openLoginView}>
                         <img
                             className="menuItemImage bigItemImage"
                             src={securityLevelImage}
@@ -302,7 +509,8 @@ class TopMenu extends React.Component {
                         />
                     </li>
                 </ul>
-                <SecuritySetting display={securitySettingDisplay} onClose={this.closeSecuritySetting} />
+                <LoginView display={loginViewDisplay} webSocket={this.ws} onClose={this.closeLoginView} openSecuritySettingView={this.openSecuritySettingView}/>
+                <SecuritySetting display={securitySettingDisplay} webSocket={this.ws} userName={userName} password={password} onClose={this.closeSecuritySetting} />
             </div>
         )
     }
