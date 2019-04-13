@@ -23,34 +23,34 @@ class SecuritySetting extends React.Component {
     this.setState({
       selectedLevel: index,
     })
-  };
+  }
 
   setSecurityLevel = () => {
-    let { userName, password } = this.props;
-    let { selectedLevel } = this.state;
+    let { userName, password } = this.props
+    let { selectedLevel } = this.state
     if (selectedLevel === 0) {
-      message.error('Please select system security level.');
-      return;
+      message.error('Please select system security level.')
+      return
     }
-    let currentSecurityLevel = cookie.load('SecurityLevelId');
-      console.log("send data", currentSecurityLevel, selectedLevel)
+    let currentSecurityLevel = cookie.load('SecurityLevelId')
+    console.log('send data', currentSecurityLevel, selectedLevel)
     if (currentSecurityLevel === selectedLevel.toString()) {
-      document.getElementById('root').style.cursor = 'default';
+      document.getElementById('root').style.cursor = 'default'
     } else {
       let data =
-        '<UserChangeSecurityLevel><' + userName + '><' + password + '><' + selectedLevel + '>';
-      this.props.webSocket.send(data);
-      document.getElementById('root').style.cursor = 'default';
+        '<UserChangeSecurityLevel><' + userName + '><' + password + '><' + selectedLevel + '>'
+      this.props.webSocket.send(data)
+      document.getElementById('root').style.cursor = 'default'
     }
     this.setState({
       selectedLevel: 0,
-    });
-    let { onClose } = this.props;
+    })
+    let { onClose } = this.props
     onClose()
-  };
+  }
 
   render() {
-    let cornerImage = 'resources/images/background/blue-corner.png';
+    let cornerImage = 'resources/images/background/blue-corner.png'
     let { selectedLevel } = this.state
     let { display, onClose } = this.props
     return (
