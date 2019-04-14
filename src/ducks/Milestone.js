@@ -16,10 +16,13 @@ const _setHideLogin = createAction(`${NS}SET_HIDE_LOGIN`)
 
 export let mobileSDK = new XPMobileSDKInterface();
 let disp;
+let connectionSuccess, connectionError;
 
-export function connect(server, dispatch) {
+export function connect(server, dispatch, successCallback, errorCallback) {
     //connectMilestone(server, dispatch);
     disp = dispatch;
+    connectionSuccess = successCallback;
+    connectionError = errorCallback;
     if (!/^http/.test(server)) {
         server = 'http://' + server;
     }
@@ -36,8 +39,8 @@ export function connect(server, dispatch) {
  * Connection state observing.
  */
 function connectionDidConnect(parameters) {
-    var username = 'User';//prompt('Username');
-    var password = 'Pa$$w0rd';//prompt('Password');
+    let username = cookie.load("MilestoneUser");
+    let password = cookie.load("MilestonePassword");
 
     mobileSDK.login(username, password);
 }
@@ -53,7 +56,10 @@ export function triggerManualEvent() {
 };
 
 function connectionDidLogIn() {
+    console.log("Getting All Cameras")
     mobileSDK.getAllViews(function (items) {
+        document.getElementById("root").style.cursor = "default";
+        triggerManualEvent();
         console.log('getAllViews: ', items);
         if(items != null && items[0].Items[0].Items[0].Items.length > 0){
             let cameras = items[0].Items[0].Items[0].Items;
@@ -61,44 +67,12 @@ function connectionDidLogIn() {
                 type: 'SET_CAMERAS',
                 cameras: cameras
             });
-            disp(_setHideLogin(true));
-            disp(push('/dashboard'));
-            document.getElementById("root").style.cursor = "default";
-            triggerManualEvent();
-            notification.open({
-                type: 'success',
-                message: 'You have successfully logged in!',
-                description:
-                    'Welcome to the Clean UI Admin Template. The Clean UI Admin Template is a complimentary template that empowers developers to make perfect looking and useful apps!',
-            });
+            connectionSuccess(cameras);
             console.log('All Cameras parsed and saved for further use.', cameras);
         }
-
-
-        //XPMobileSDK.createVideoPushConnection(
-
-        //	function (videoPushConnection) {
-
-        //		var vids = document.getElementsByTagName('video')
-        //		video = vids.item(0);
-        //		var canvases = document.getElementsByTagName('canvas');
-        //		canvas =  canvases.item(0);
-        //		canvasContext = canvas.getContext('2d');
-
-        //		video.onloadedmetadata = function (event) {
-
-        //			video.onloadedmetadata = function (event) {};
-        //			video.play();
-        //		};
-        //		video.ontimeupdate = function (event) {
-
-        //			video.ontimeupdate = function (event) {};
-        //			videoPushConnection.open(onVideoPushConnection, function (error) {});
-        //		};
-        //		video.src = window.URL.createObjectURL(videoPushConnection.getMediaStream());
-        //	},
-        //	function (error) {}
-        //);
+    }, function (error) {
+        console.log("Error: ", error);
+        connectionError();
     });
 }
 

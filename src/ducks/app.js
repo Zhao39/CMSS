@@ -5,6 +5,8 @@ import * as Milestone from './Milestone'
 import cookie from 'react-cookie'
 
 import rootReducer from './redux'
+import {notification} from "antd";
+import {triggerManualEvent} from "./Milestone";
 
 const REDUCER = 'app'
 const NS = `@@${REDUCER}/`
@@ -91,9 +93,20 @@ export function login(username, password, dispatch) {
     window.localStorage.setItem('app.Role', 'administrator');
     const server = rootReducer.adaptorServerUrl + '/adaptor/connection';
     cookie.save('server', server);
-    Milestone.connect( server, dispatch );
+    dispatch(_setHideLogin(true));
+    dispatch(push('/dashboard'));
+    notification.open({
+        type: 'success',
+        message: 'You have successfully logged in!',
+        description:
+            'Welcome to the Clean UI Admin Template. The Clean UI Admin Template is a complimentary template that empowers developers to make perfect looking and useful apps!',
+    });
     return true;
+}
 
+export function connectToMilestone(dispatch, successCallback, errorCallback) {
+    let server = cookie.load('server');
+    Milestone.connect( server, dispatch, successCallback, errorCallback );
 }
 
 export const logout = () => (dispatch, getState) => {
