@@ -19,7 +19,7 @@ import './style.scss'
 
 import { WidthProvider, Responsive } from 'react-grid-layout'
 
-import { connectToMilestone } from "ducks/app";
+import { connectToMilestone } from 'ducks/app'
 import { getAllDecks } from 'ducks/decks'
 import { getAllDevices } from 'ducks/devices'
 import { getAllDeckLocations } from 'ducks/deckLocations'
@@ -55,7 +55,7 @@ const defaultProps = {
 )
 class DashboardAlpha extends React.PureComponent {
     constructor(props) {
-        super(props);
+        super(props)
         this.state = {
             day: new Date(),
             items: [0, 1, 2, 3, 4].map(function(i, key, list) {
@@ -67,115 +67,119 @@ class DashboardAlpha extends React.PureComponent {
                     h: 2,
                 }
             }),
-            display: false
-        };
+            display: false,
+        }
         this.handleChange = this.handleChange.bind(this)
     }
 
     componentWillMount() {
         //requestAllStreams(this.state.cameras);
-        let { dispatch, widgetInfo, urls } = this.props;
-        connectToMilestone(dispatch, () => {
-            let cameras = urls.cameras;
-            dispatch({
-                type: 'SET_PLAYBACK_VIEW',
-                playbackView: { visible: true },
-            });
-            dispatch({
-                type: 'SET_DECK_VIEW',
-                deckView: { visible: true },
-            });
-            dispatch({
-                type: 'SET_SENSOR_VIEW',
-                sensorView: { visible: true },
-            });
-            dispatch({
-                type: 'SET_EVENT_VIEW',
-                eventView: { visible: true },
-            });
+        let { dispatch, widgetInfo, urls } = this.props
+        connectToMilestone(
+            dispatch,
+            () => {
+                let cameras = urls.cameras;
+                dispatch({
+                    type: 'SET_PLAYBACK_VIEW',
+                    playbackView: { visible: true },
+                });
+                dispatch({
+                    type: 'SET_DECK_VIEW',
+                    deckView: { visible: true },
+                });
+                dispatch({
+                    type: 'SET_SENSOR_VIEW',
+                    sensorView: { visible: true },
+                });
+                dispatch({
+                    type: 'SET_EVENT_VIEW',
+                    eventView: { visible: true },
+                });
 
-            let cameraViews = [];
-            cameras.map(camera => {
-                cameraViews.push({
-                    id: camera.Id,
-                    visible: true,
-                })
-            });
-            dispatch({
-                type: 'SET_CAMERA_VIEWS',
-                cameraViews: cameraViews,
-            });
-            let items = [];
-            const camera_count = cameras.length;
-            const cols = 3;
-            const w = 3;
-            const h = 2;
-            if (camera_count > 0) {
-                for (let i = 0; i < camera_count; i++) {
-                    items.push({
-                        i: 'cameraView-' + cameras[i].Id,
-                        x: (cols - (i % cols) - 1) * w,
-                        y: Math.floor(i / cols) * h,
-                        w: w,
-                        h: h,
-                    });
+                let cameraViews = [];
+                cameras.map(camera => {
+                    cameraViews.push({
+                        id: camera.Id,
+                        visible: true,
+                    })
+                });
+                dispatch({
+                    type: 'SET_CAMERA_VIEWS',
+                    cameraViews: cameraViews,
+                });
+                let items = [];
+                const camera_count = cameras.length;
+                const cols = 3;
+                const w = 3;
+                const h = 2;
+                if (camera_count > 0) {
+                    for (let i = 0; i < camera_count; i++) {
+                        items.push({
+                            i: 'cameraView-' + cameras[i].Id,
+                            x: (cols - (i % cols) - 1) * w,
+                            y: Math.floor(i / cols) * h,
+                            w: w,
+                            h: h,
+                        });
+                    }
                 }
-            }
-            items.push({
-                i: 'sensorView',
-                x: cols * w,
-                y: 0,
-                w: 3,
-                h: 4,
-            });
-            items.push({
-                i: 'playbackView',
-                x: cols * w,
-                y: 4,
-                w: 3,
-                h: 4,
-            });
-            items.push({
-                i: 'deckView',
-                x: 0,
-                y: Math.ceil(camera_count / 3) * h,
-                w: 8,
-                h: 3,
-            });
-            items.push({
-                i: 'eventView',
-                x: 8,
-                y: Math.ceil(camera_count / 3) * h,
-                w: 4,
-                h: 3,
-                minW: 4,
-                minH: 3,
-            });
-            this.setState({
-                items: items,
-                display: true
-            });
-        }, () => {
-            console.log("Failed to connect milestone server");
-        });
+                items.push({
+                    i: 'sensorView',
+                    x: cols * w,
+                    y: 0,
+                    w: 3,
+                    h: 4,
+                });
+                items.push({
+                    i: 'playbackView',
+                    x: cols * w,
+                    y: 4,
+                    w: 3,
+                    h: 4,
+                });
+                items.push({
+                    i: 'deckView',
+                    x: 0,
+                    y: Math.ceil(camera_count / 3) * h,
+                    w: 8,
+                    h: 3,
+                });
+                items.push({
+                    i: 'eventView',
+                    x: 8,
+                    y: Math.ceil(camera_count / 3) * h,
+                    w: 4,
+                    h: 3,
+                    minW: 4,
+                    minH: 3,
+                });
+                this.setState({
+                    items: items,
+                    display: true,
+                });
+            },
+            () => {
+                console.log('Failed to connect milestone server');
+            },
+        );
         getAllDecks(dispatch);
         getAllDevices(dispatch);
         getAllDeckLocations(dispatch);
         getAllDeckZones(dispatch);
         getAllSecurityEvents(dispatch);
         getAllDeviceAttributes(dispatch);
-        message.loading("Connecting to milestone server...", 10);
+        message.loading('Connecting to milestone server...', 10);
     }
 
     handleChange = date => {
         this.setState({ day: date })
-    }
+    };
 
     addCameraView = cameraId => {
-        console.log('addCameraView: ', cameraId)
-        let { items } = this.state
-        let { dispatch, widgetInfo } = this.props
-        let cameraViews = widgetInfo.cameraViews
+        console.log('addCameraView: ', cameraId);
+        let { items } = this.state;
+        let { dispatch, widgetInfo } = this.props;
+        let cameraViews = widgetInfo.cameraViews;
         this.setState({
             // Add a new item. It must have a unique key!
             items: items.concat({
@@ -185,21 +189,21 @@ class DashboardAlpha extends React.PureComponent {
                 w: 3,
                 h: 2,
             }),
-        })
+        });
         let newCameraViews = cameraViews.filter(cameraView => {
             return cameraView.id !== cameraId
-        })
-        newCameraViews.push({ id: cameraId, visible: true })
+        });
+        newCameraViews.push({ id: cameraId, visible: true });
         dispatch({
             type: 'SET_CAMERA_VIEWS',
             cameraViews: newCameraViews,
         })
-    }
+    };
 
     addDeckView = () => {
-        console.log('Adding Deck View: ')
-        let { dispatch } = this.props
-        let { items } = this.state
+        console.log('Adding Deck View: ');
+        let { dispatch } = this.props;
+        let { items } = this.state;
         this.setState({
             // Add a new item. It must have a unique key!
             items: items.concat({
@@ -209,16 +213,16 @@ class DashboardAlpha extends React.PureComponent {
                 w: 8,
                 h: 3,
             }),
-        })
+        });
         dispatch({
             type: 'SET_DECK_VIEW',
             deckView: { visible: true },
-        })
-    }
+        });
+    };
 
     addEventView = () => {
-        console.log('Adding Event View: ')
-        let { items } = this.state
+        console.log('Adding Event View: ');
+        let { items } = this.state;
         this.setState({
             // Add a new item. It must have a unique key!
             items: items.concat({
@@ -230,12 +234,12 @@ class DashboardAlpha extends React.PureComponent {
                 minW: 4,
                 minH: 3,
             }),
-        })
-    }
+        });
+    };
 
     addSensorView = () => {
-        console.log('Adding Sensor View: ')
-        let { items } = this.state
+        console.log('Adding Sensor View: ');
+        let { items } = this.state;
         this.setState({
             // Add a new item. It must have a unique key!
             items: items.concat({
@@ -245,12 +249,12 @@ class DashboardAlpha extends React.PureComponent {
                 w: 3,
                 h: 4,
             }),
-        })
-    }
+        });
+    };
 
     addPlaybackView = () => {
-        console.log('Adding PlaybackView: ')
-        let { items } = this.state
+        console.log('Adding PlaybackView: ');
+        let { items } = this.state;
         this.setState({
             // Add a new item. It must have a unique key!
             items: items.concat({
@@ -260,42 +264,42 @@ class DashboardAlpha extends React.PureComponent {
                 w: 3,
                 h: 4,
             }),
-        })
-    }
+        });
+    };
 
     createElement = el => {
-        let playbackCamera = this.props.urls.playbackCamera
-        let playbackClassName = 'DataCard bg-transparent'
+        let playbackCamera = this.props.urls.playbackCamera;
+        let playbackClassName = 'DataCard bg-transparent';
         if (typeof playbackCamera !== 'undefined' && playbackCamera.hasOwnProperty('Id')) {
-            playbackClassName += ' green'
+            playbackClassName += ' green';
         }
-        const { cameras } = this.props.urls
-        let { day } = this.state
-        const id = el.i
-        const type = id.split('-')[0]
+        const { cameras } = this.props.urls;
+        let { day } = this.state;
+        const id = el.i;
+        const type = id.split('-')[0];
         switch (type) {
             case 'cameraView': {
-                let cameraId = id.replace('cameraView-', '')
-                let className = 'DataCard camera bg-transparent'
-                let isPlayback = false
+                let cameraId = id.replace('cameraView-', '');
+                let className = 'DataCard camera bg-transparent';
+                let isPlayback = false;
                 if (typeof playbackCamera !== 'undefined' && playbackCamera.hasOwnProperty('Id')) {
                     if (playbackCamera.Id === cameraId) {
-                        isPlayback = true
-                        className += ' green'
+                        isPlayback = true;
+                        className += ' green';
                     }
                 }
                 let camera = cameras.find(camera => {
-                    return camera.Id === cameraId
-                })
+                    return camera.Id === cameraId;
+                });
                 return (
                     <div className={className} key={id} data-grid={el}>
                         <ReactSwipeEvents
                             onSwiped={(e, originalX, originalY, currentX, currentY) => {
                                 let dis = Math.sqrt(
                                     Math.pow(currentX - originalX, 2) + Math.pow(currentY - originalY, 2),
-                                )
+                                );
                                 if (dis > sw_value) {
-                                    this.onRemoveItem(id)
+                                    this.onRemoveItem(id);
                                 }
                             }}
                         >
@@ -312,9 +316,9 @@ class DashboardAlpha extends React.PureComponent {
                             onSwiped={(e, originalX, originalY, currentX, currentY) => {
                                 let dis = Math.sqrt(
                                     Math.pow(currentX - originalX, 2) + Math.pow(currentY - originalY, 2),
-                                )
+                                );
                                 if (dis > sw_value) {
-                                    this.onRemoveItem(id)
+                                    this.onRemoveItem(id);
                                 }
                             }}
                         >
@@ -338,9 +342,9 @@ class DashboardAlpha extends React.PureComponent {
                             onSwiped={(e, originalX, originalY, currentX, currentY) => {
                                 let dis = Math.sqrt(
                                     Math.pow(currentX - originalX, 2) + Math.pow(currentY - originalY, 2),
-                                )
+                                );
                                 if (dis > sw_value) {
-                                    this.onRemoveItem(id)
+                                    this.onRemoveItem(id);
                                 }
                             }}
                         >
@@ -357,9 +361,9 @@ class DashboardAlpha extends React.PureComponent {
                             onSwiped={(e, originalX, originalY, currentX, currentY) => {
                                 let dis = Math.sqrt(
                                     Math.pow(currentX - originalX, 2) + Math.pow(currentY - originalY, 2),
-                                )
+                                );
                                 if (dis > sw_value) {
-                                    this.onRemoveItem(id)
+                                    this.onRemoveItem(id);
                                 }
                             }}
                         >
@@ -376,9 +380,9 @@ class DashboardAlpha extends React.PureComponent {
                             onSwiped={(e, originalX, originalY, currentX, currentY) => {
                                 let dis = Math.sqrt(
                                     Math.pow(currentX - originalX, 2) + Math.pow(currentY - originalY, 2),
-                                )
+                                );
                                 if (dis > sw_value) {
-                                    this.onRemoveItem(id)
+                                    this.onRemoveItem(id);
                                 }
                             }}
                         >
@@ -389,86 +393,86 @@ class DashboardAlpha extends React.PureComponent {
                 )
             }
         }
-    }
+    };
 
     onBreakpointChange = (breakpoint, cols) => {
         this.setState({
             breakpoint: breakpoint,
             cols: cols,
-        })
-    }
+        });
+    };
 
     onLayoutChange = layout => {
         //this.props.onLayoutChange(layout);
-        this.setState({ layout: layout })
-    }
+        this.setState({ layout: layout });
+    };
 
     onRemoveItem = i => {
-        console.log('removing', i)
-        let { dispatch } = this.props
-        let { items } = this.state
+        console.log('removing', i);
+        let { dispatch } = this.props;
+        let { items } = this.state;
         switch (i) {
             case 'playbackView': {
                 dispatch({
                     type: 'SET_PLAYBACK_VIEW',
                     playbackView: { visible: false },
-                })
-                break
+                });
+                break;
             }
             case 'eventView': {
                 dispatch({
                     type: 'SET_EVENT_VIEW',
                     eventView: { visible: false },
-                })
-                break
+                });
+                break;
             }
             case 'deckView': {
                 dispatch({
                     type: 'SET_DECK_VIEW',
                     deckView: { visible: false },
-                })
-                break
+                });
+                break;
             }
             case 'sensorView': {
                 dispatch({
                     type: 'SET_SENSOR_VIEW',
                     sensorView: { visible: false },
-                })
-                break
+                });
+                break;
             }
             default: {
-                let cameraId = i.replace('cameraView-', '')
-                let cameraViews = this.props.widgetInfo.cameraViews
-                let newInfo = []
+                let cameraId = i.replace('cameraView-', '');
+                let cameraViews = this.props.widgetInfo.cameraViews;
+                let newInfo = [];
                 cameraViews.map(cameraView => {
                     if (cameraView.id === cameraId) {
                         newInfo.push({
                             id: cameraId,
                             visible: false,
-                        })
+                        });
                     } else {
-                        newInfo.push(cameraView)
+                        newInfo.push(cameraView);
                     }
-                })
+                });
                 dispatch({
                     type: 'SET_CAMERA_VIEWS',
                     cameraViews: newInfo,
-                })
-                break
+                });
+                break;
             }
         }
-        this.setState({ items: _.reject(items, { i: i }) })
-    }
+        this.setState({ items: _.reject(items, { i: i }) });
+    };
 
     render() {
-        let { items, display } = this.state
-        let t_width = document.body.clientWidth
-        let r_height = Math.round(((t_width / 4 / 16) * 9) / 2)
-        let grid_lay_conf = defaultProps
+        let { items, display } = this.state;
+        let t_width = document.body.clientWidth;
+        let r_height = Math.round(((t_width / 4 / 16) * 9) / 2);
+        let grid_lay_conf = defaultProps;
         if (grid_lay_conf.rowHeight) {
-            grid_lay_conf.rowHeight = r_height
+            grid_lay_conf.rowHeight = r_height;
         }
-        let { accessInfo } = this.props
+        let { accessInfo } = this.props;
         return (
             <div>
                 <TopMenu
@@ -479,21 +483,17 @@ class DashboardAlpha extends React.PureComponent {
                     addPlaybackView={this.addPlaybackView}
                     removeView={this.onRemoveItem}
                 />
-                {
-                    display?<ResponsiveReactGridLayout
-                            onLayoutChange={this.onLayoutChange}
-                            onBreakpointChange={this.onBreakpointChange}
-                            {...grid_lay_conf}
-                        >
-                            {_.map(items, el => this.createElement(el))}
-                        </ResponsiveReactGridLayout>:
-                        <Loader
-                            type="Ball-Triangle"
-                            color="#00BFFF"
-                            height="50rem"
-                            width="100%"
-                        />
-                }
+                {display ? (
+                    <ResponsiveReactGridLayout
+                        onLayoutChange={this.onLayoutChange}
+                        onBreakpointChange={this.onBreakpointChange}
+                        {...grid_lay_conf}
+                    >
+                        {_.map(items, el => this.createElement(el))}
+                    </ResponsiveReactGridLayout>
+                ) : (
+                    <Loader type="Ball-Triangle" color="#00BFFF" height="50rem" width="100%" />
+                )}
                 <AccessControlView accessInfo={accessInfo} />
             </div>
         )

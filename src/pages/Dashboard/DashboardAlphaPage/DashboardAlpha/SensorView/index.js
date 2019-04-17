@@ -30,8 +30,8 @@ class SensorView extends React.Component {
   componentDidMount() {}
 
   handleResize = () => {
-    console.log("Resizing")
-  };
+    console.log('Resizing')
+  }
 
   render() {
     let { border } = this.state
