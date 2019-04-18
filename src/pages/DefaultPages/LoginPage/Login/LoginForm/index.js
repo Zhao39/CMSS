@@ -310,7 +310,6 @@ class LoginForm extends React.Component {
             }}
           >
             {form.getFieldDecorator('username', {
-              initialValue: 'Captain',
               rules: [{ required: true, message: 'Please input user name' }],
             })(
               <Input
@@ -327,7 +326,6 @@ class LoginForm extends React.Component {
           </FormItem>
           <FormItem label="PASSWORD">
             {form.getFieldDecorator('password', {
-              initialValue: 'Captain',
               rules: [{ required: true, message: 'Please input your password' }],
             })(
               <Input

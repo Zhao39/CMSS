@@ -1,7 +1,7 @@
 import axios from 'axios'
 import rootReducer from './redux'
 
-const INITIAL_STATE = { display: true, sortType: 'datetime', order: 0, eventLogs: [] };
+const INITIAL_STATE = { display: true, update: true, sortType: 'datetime', order: 0, eventLogs: [] }
 
 export default function(state = INITIAL_STATE, action) {
   switch (action.type) {
@@ -15,17 +15,21 @@ export default function(state = INITIAL_STATE, action) {
       }
     }
     case 'PREPEND_EVENT_LOG': {
+      console.log("Update: ", state.update);
       return {
         ...state,
         ...(state.eventLogs =
-          state.sortType === action.sortType
+          state.sortType === action.sortType && state.update
             ? action.eventLogs.concat(state.eventLogs)
             : state.eventLogs),
       }
     }
+    case 'SET_UPDATE': {
+      return { ...state, ...(state.update = action.update) }
+    }
     default:
   }
-  return state;
+  return state
 }
 
 export function getAllSecurityEvents(dispatch, sortType = 'datetime', order = 0) {
@@ -51,23 +55,25 @@ function updateEventLogs(url, latest, dispatch) {
       },
     })
     .then(response => {
-      if (INITIAL_STATE.sortType !== 'datetime' || INITIAL_STATE.order !== 0) return;
+      if (INITIAL_STATE.sortType !== 'datetime' || INITIAL_STATE.order !== 0) return
       let eventLogs = response.data;
+      //latest = INITIAL_STATE.eventLogs[0].DateTime;
       if (eventLogs.length > 0) {
         dispatch({
           type: 'PREPEND_EVENT_LOG',
           sortType: 'datetime',
           eventLogs: eventLogs,
-        });
+        })
         latest = eventLogs[0].DateTime;
+        console.log("EventLogs: ", eventLogs);
       }
       setTimeout(() => {
-        updateEventLogs(url, latest, dispatch);
-      }, 1000);
+        updateEventLogs(url, latest, dispatch)
+      }, 1000)
     })
 }
 
-function getEventLogs(url, index, limit, page_count, sortType, order, dispatch) {
+function getEventLogs( url, index, limit, page_count, sortType, order, dispatch ) {
   axios
     .get(url, {
       params: {
@@ -78,16 +84,16 @@ function getEventLogs(url, index, limit, page_count, sortType, order, dispatch) 
       },
     })
     .then(response => {
-      let eventLogs = response.data;
+      let eventLogs = response.data
       if (index === 0) {
         dispatch({
           type: 'SET_EVENT_LOG',
           eventLogs: eventLogs,
-        });
+        })
         if (sortType === 'datetime' && order === 0) {
-          let url = rootReducer.serverUrl + '/api/securityEvents/updateEventLogs';
+          let url = rootReducer.serverUrl + '/api/securityEvents/updateEventLogs'
           if (eventLogs.length > 0) {
-            updateEventLogs(url, eventLogs[0].DateTime, dispatch);
+            updateEventLogs(url, INITIAL_STATE.eventLogs[0].DateTime, dispatch)
           }
         }
       } else {
@@ -101,10 +107,10 @@ function getEventLogs(url, index, limit, page_count, sortType, order, dispatch) 
           dispatch({
             type: 'ADD_EVENT_LOG',
             eventLogs: eventLogs,
-          });
+          })
         }
       }
-      index ++;
-      getEventLogs(url, index, limit, page_count, sortType, order, dispatch);
+      index++
+      getEventLogs(url, index, limit, page_count, sortType, order, dispatch)
     })
 }

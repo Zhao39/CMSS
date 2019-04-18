@@ -19,28 +19,28 @@ class LoginView extends React.Component {
     selectedLevel: 0,
     userName: '',
     password: '',
-  };
+  }
 
   onLogin = () => {
-    let { userName, password } = this.state;
+    let { userName, password } = this.state
     if (userName === '') {
-      message.warning('Input user name.');
-      return;
+      message.warning('Input user name.')
+      return
     }
     if (password === '') {
-      message.warning('Input password.');
-      return;
+      message.warning('Input password.')
+      return
     }
     let data =
-      '<UserCheckPermission><' + userName + '><' + password + '><Modify System Security Level>';
-    this.props.webSocket.send(data);
-    this.props.openSecuritySettingView(userName, password);
-    document.getElementById('root').style.cursor = 'wait';
+      '<UserCheckPermission><' + userName + '><' + password + '><Modify System Security Level>'
+    this.props.webSocket.send(data)
+    this.props.openSecuritySettingView(userName, password)
+    document.getElementById('root').style.cursor = 'wait'
     this.setState({
-        userName: '',
-        password: '',
-    });
-    let { onClose } = this.props;
+      userName: '',
+      password: '',
+    })
+    let { onClose } = this.props
     onClose()
   }
 
@@ -56,7 +56,7 @@ class LoginView extends React.Component {
     this.setState({
       password: password,
     })
-  };
+  }
 
   render() {
     let cornerImage = 'resources/images/background/blue-corner.png'
