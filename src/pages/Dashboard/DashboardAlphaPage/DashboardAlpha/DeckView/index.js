@@ -132,8 +132,12 @@ class DeckView extends React.PureComponent {
         document.getElementById('root').style.cursor = 'wait'
         triggerManualEvent()
         setTimeout(() => {
+          dispatch({
+              type: 'CLEAR_DATA',
+              accessInfo: accessInfo
+          });
           getSecurityEventsByDeviceID(accessInfo, eventLogs, dispatch)
-        }, 100)
+        }, 100);
         break
       }
       case 5: {

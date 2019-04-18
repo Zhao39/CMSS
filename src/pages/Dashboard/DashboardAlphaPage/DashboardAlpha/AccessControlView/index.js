@@ -114,7 +114,6 @@ class AccessControlView extends React.Component {
     let logHistory = this.props.logInfo.logHistory
     let { limit_count } = this.state
     let rowCount = limit_count > logHistory.length ? logHistory.length : limit_count
-    let logHistoryArray = logHistory.slice(0, rowCount)
     //if(accessInfo.count !== logHistoryArray.length) return(<div/>);
     let roomName = 'GUEST CABIN1'
     let deckName = 'DECK 4'
@@ -163,13 +162,13 @@ class AccessControlView extends React.Component {
     switch (sortType) {
       case 'datetime': {
         if (sortOrder === 0) {
-          logHistoryArray.sort((a, b) => {
+          logHistory.sort((a, b) => {
             let t_1 = new Date(a.datetime).getTime()
             let t_2 = new Date(b.datetime).getTime()
             return t_2 - t_1
           })
         } else {
-          logHistoryArray.sort((a, b) => {
+          logHistory.sort((a, b) => {
             let t_1 = new Date(a.datetime).getTime()
             let t_2 = new Date(b.datetime).getTime()
             return t_1 - t_2
@@ -179,15 +178,17 @@ class AccessControlView extends React.Component {
       }
       case 'date': {
         if (sortOrder === 0) {
-          logHistoryArray.sort((a, b) => {
-            let t_1 = new Date(a.date).getTime()
-            let t_2 = new Date(b.date).getTime()
+            console.log("SortOrder: Date", sortOrder)
+          logHistory.sort((a, b) => {
+            let t_1 = new Date(a.datetime).getTime()
+            let t_2 = new Date(b.datetime).getTime()
             return t_2 - t_1
           })
         } else {
-          logHistoryArray.sort((a, b) => {
-            let t_1 = new Date(a.date).getTime()
-            let t_2 = new Date(b.date).getTime()
+            console.log("SortOrder: Date", sortOrder)
+          logHistory.sort((a, b) => {
+            let t_1 = new Date(a.datetime).getTime()
+            let t_2 = new Date(b.datetime).getTime()
             return t_1 - t_2
           })
         }
@@ -195,13 +196,13 @@ class AccessControlView extends React.Component {
       }
       case 'time': {
         if (sortOrder === 0) {
-          logHistoryArray.sort((a, b) => {
+          logHistory.sort((a, b) => {
             let t_1 = new Date(logHistoryData[0].date + ' ' + a.time).getTime()
             let t_2 = new Date(logHistoryData[0].date + ' ' + b.time).getTime()
             return t_2 - t_1
           })
         } else {
-          logHistoryArray.sort((a, b) => {
+          logHistory.sort((a, b) => {
             let t_1 = new Date(logHistoryData[0].date + ' ' + a.time).getTime()
             let t_2 = new Date(logHistoryData[0].date + ' ' + b.time).getTime()
             return t_1 - t_2
@@ -211,11 +212,11 @@ class AccessControlView extends React.Component {
       }
       case 'operator': {
         if (sortOrder === 0) {
-          logHistoryArray.sort((a, b) => {
+          logHistory.sort((a, b) => {
             return b.operator === a.operator ? 0 : b.operator > a.operator ? -1 : 1
           })
         } else {
-          logHistoryArray.sort((a, b) => {
+          logHistory.sort((a, b) => {
             return b.operator === a.operator ? 0 : b.operator < a.operator ? -1 : 1
           })
         }
@@ -223,20 +224,22 @@ class AccessControlView extends React.Component {
       }
       case 'access': {
         if (sortOrder === 0) {
-          logHistoryArray.sort((a, b) => {
+          logHistory.sort((a, b) => {
             return b.access === a.access ? 0 : b.access > a.access ? -1 : 1
           })
         } else {
-          logHistoryArray.sort((a, b) => {
+          logHistory.sort((a, b) => {
             return b.access === a.access ? 0 : b.access < a.access ? -1 : 1
           })
         }
         break
       }
     }
-    let userName = logHistoryArray[selectRow] ? logHistoryArray[selectRow].operator : ''
-    let memberId = logHistoryArray[selectRow] ? logHistoryArray[selectRow].memberId : ''
-    let clearanceId = logHistoryArray[selectRow] ? logHistoryArray[selectRow].clearanceId : ''
+    let logHistoryArray = logHistory.slice(0, rowCount)
+    let userName = logHistoryArray[selectRow] ? logHistoryArray[selectRow].operator : '';
+    let memberId = logHistoryArray[selectRow] ? logHistoryArray[selectRow].memberId : '';
+    let clearanceId = logHistoryArray[selectRow] ? logHistoryArray[selectRow].clearanceId : '';
+    console.log("LogHistory: ", logHistory, logHistoryArray)
     return (
       <div className={'AccessControlModal DataCard bg-transparent'} style={{ display: display }}>
         <div className={'AccessContainer'}>
@@ -371,7 +374,7 @@ class AccessControlView extends React.Component {
           <div className={'historyTableArea'} onScroll={this.onScroll}>
             <div className={historyTableBottom}>
               {logHistoryArray.map(data => {
-                index++
+                index++;
                 let date = data.date
                 let time = data.time
                 let operator = data.operator
