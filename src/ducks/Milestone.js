@@ -56,7 +56,6 @@ function connectionDidConnect(parameters) {
  * Connection state observing.
  */
 export function triggerManualEvent() {
-  console.log('trigger manual event')
   let event = document.createEvent('MouseEvents')
   event.initMouseEvent(
     'mousemove',

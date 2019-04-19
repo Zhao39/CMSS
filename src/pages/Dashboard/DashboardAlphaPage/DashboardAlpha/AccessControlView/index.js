@@ -178,14 +178,14 @@ class AccessControlView extends React.Component {
       }
       case 'date': {
         if (sortOrder === 0) {
-            console.log("SortOrder: Date", sortOrder)
+          console.log('SortOrder: Date', sortOrder)
           logHistory.sort((a, b) => {
             let t_1 = new Date(a.datetime).getTime()
             let t_2 = new Date(b.datetime).getTime()
             return t_2 - t_1
           })
         } else {
-            console.log("SortOrder: Date", sortOrder)
+          console.log('SortOrder: Date', sortOrder)
           logHistory.sort((a, b) => {
             let t_1 = new Date(a.datetime).getTime()
             let t_2 = new Date(b.datetime).getTime()
@@ -235,11 +235,10 @@ class AccessControlView extends React.Component {
         break
       }
     }
-    let logHistoryArray = logHistory.slice(0, rowCount)
+    let logHistoryArray = logHistory.slice(0, rowCount);
     let userName = logHistoryArray[selectRow] ? logHistoryArray[selectRow].operator : '';
     let memberId = logHistoryArray[selectRow] ? logHistoryArray[selectRow].memberId : '';
     let clearanceId = logHistoryArray[selectRow] ? logHistoryArray[selectRow].clearanceId : '';
-    console.log("LogHistory: ", logHistory, logHistoryArray)
     return (
       <div className={'AccessControlModal DataCard bg-transparent'} style={{ display: display }}>
         <div className={'AccessContainer'}>
@@ -374,7 +373,7 @@ class AccessControlView extends React.Component {
           <div className={'historyTableArea'} onScroll={this.onScroll}>
             <div className={historyTableBottom}>
               {logHistoryArray.map(data => {
-                index++;
+                index++
                 let date = data.date
                 let time = data.time
                 let operator = data.operator
