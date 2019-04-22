@@ -13,6 +13,7 @@ import EventView from './EventView/index'
 import SensorView from './SensorView/index'
 import PlaybackView from './PlaybackView/index'
 import AccessControlView from './AccessControlView/index'
+import CameraEventView from './CameraEventView/index'
 
 import 'react-datepicker/dist/react-datepicker.css'
 import './style.scss'
@@ -322,7 +323,7 @@ class DashboardAlpha extends React.PureComponent {
                 }
               }}
             >
-              <DeckView />
+              <DeckView addCameraView={this.addCameraView}/>
               <button className={'closeButton'} onClick={this.onRemoveItem.bind(this, id)} />
             </ReactSwipeEvents>
           </div>
@@ -495,6 +496,7 @@ class DashboardAlpha extends React.PureComponent {
           <Loader type="Ball-Triangle" color="#00BFFF" height="50rem" width="100%" />
         )}
         <AccessControlView accessInfo={accessInfo} />
+        <CameraEventView/>
       </div>
     )
   }

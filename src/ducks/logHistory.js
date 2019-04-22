@@ -55,17 +55,17 @@ export let getSecurityEventsByDeviceID = (
   sortType = 'datetime',
   order = 0,
 ) => {
-    let deviceId = accessInfo.DeviceID
-    let url = rootReducer.serverUrl + '/api/securityEvents/getEventsByDeviceId'
-    let url_1 = rootReducer.serverUrl + '/api/securityEvents/getCountByDeviceId?DeviceID=' + deviceId
-    axios.get(url_1).then(response => {
-        let total_count = response.data.count
-        console.log('eventLog count: ', total_count)
-        let limit = 100
-        let page_count =
-            total_count % limit === 0 ? total_count / limit : Math.ceil(total_count / limit)
-        //getEventsByDeviceId(url, 0, limit, page_count, sortType, order, deviceId, dispatch)
-    })
+  let deviceId = accessInfo.DeviceID
+  let url = rootReducer.serverUrl + '/api/securityEvents/getEventsByDeviceId'
+  let url_1 = rootReducer.serverUrl + '/api/securityEvents/getCountByDeviceId?DeviceID=' + deviceId
+  axios.get(url_1).then(response => {
+    let total_count = response.data.count
+    console.log('eventLog count: ', total_count)
+    let limit = 100
+    let page_count =
+      total_count % limit === 0 ? total_count / limit : Math.ceil(total_count / limit)
+    getEventsByDeviceId(url, 0, limit, page_count, sortType, order, deviceId, dispatch)
+  })
 }
 
 function getEventsByDeviceId(url, index, limit, page_count, sortType, order, deviceId, dispatch) {

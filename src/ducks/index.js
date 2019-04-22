@@ -13,6 +13,7 @@ import logInfo from './logHistory'
 import deckZonesInfo from './deckZones'
 import eventInfo from './event'
 import systemInfo from './system'
+import cameraEventViewInfo from './CameraEventView'
 
 export default combineReducers({
   routing: routerReducer,
@@ -27,6 +28,7 @@ export default combineReducers({
   deckZonesInfo: deckZonesInfo,
   eventInfo: eventInfo,
   systemInfo: systemInfo,
+  cameraEventViewInfo: cameraEventViewInfo,
   app,
   login,
 })

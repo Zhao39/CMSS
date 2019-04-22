@@ -235,10 +235,10 @@ class AccessControlView extends React.Component {
         break
       }
     }
-    let logHistoryArray = logHistory.slice(0, rowCount);
-    let userName = logHistoryArray[selectRow] ? logHistoryArray[selectRow].operator : '';
-    let memberId = logHistoryArray[selectRow] ? logHistoryArray[selectRow].memberId : '';
-    let clearanceId = logHistoryArray[selectRow] ? logHistoryArray[selectRow].clearanceId : '';
+    let logHistoryArray = logHistory.slice(0, rowCount)
+    let userName = logHistoryArray[selectRow] ? logHistoryArray[selectRow].operator : ''
+    let memberId = logHistoryArray[selectRow] ? logHistoryArray[selectRow].memberId : ''
+    let clearanceId = logHistoryArray[selectRow] ? logHistoryArray[selectRow].clearanceId : ''
     return (
       <div className={'AccessControlModal DataCard bg-transparent'} style={{ display: display }}>
         <div className={'AccessContainer'}>

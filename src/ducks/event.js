@@ -38,10 +38,10 @@ export function getAllSecurityEvents(dispatch, sortType = 'datetime', order = 0)
   let url1 = rootReducer.serverUrl + '/api/securityEvents/count'
   axios.get(url1).then(response => {
     let total_count = response.data.count
-    let limit = 100
+    let limit = 1500
     let page_count =
       total_count % limit === 0 ? total_count / limit : Math.ceil(total_count / limit)
-    //getEventLogs(url, 0, limit, page_count, sortType, order, dispatch)
+    getEventLogs(url, 0, limit, page_count, sortType, order, dispatch)
   })
 }
 

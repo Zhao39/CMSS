@@ -14,6 +14,7 @@ const mapStateToProps = (state, props) => ({
   deckLocations: state.deckLocationsInfo,
   accessInfo: state.accessInfo,
   eventInfo: state.eventInfo,
+  widgetInfo: state.widgetInfo
 });
 
 const mapDispatchToProps = (dispatch, props) => ({
@@ -96,7 +97,7 @@ class DeckView extends React.PureComponent {
             left: accessInfo.left,
             top: accessInfo.top,
           },
-          cameraPopupInfo: {},
+          cameraPopupInfo: {accessInfo},
         })
 
         this.setState({
@@ -179,31 +180,31 @@ class DeckView extends React.PureComponent {
       cameraPopupInfo,
       deckSensorPopupDisplay,
       deckSensorPopupInfo,
-    } = this.state;
-    let cornerImage = '';
+    } = this.state
+    let cornerImage = ''
     if (border === 'blue') {
-      cornerImage = 'resources/images/background/blue-corner.png';
+      cornerImage = 'resources/images/background/blue-corner.png'
     }
-    let { currentDeck, decksArray } = this.props.decks;
-    let { devices, deckLocations, dispatch } = this.props;
-    let deviceArray_temp = devices.devicesArray;
-    let deviceAttributeArray = devices.deviceAttributeArray;
-    let deviceArray = [];
+    let { currentDeck, decksArray } = this.props.decks
+    let { devices, deckLocations, widgetInfo, urls, dispatch } = this.props
+    let deviceArray_temp = devices.devicesArray
+    let deviceAttributeArray = devices.deviceAttributeArray
+    let deviceArray = []
     deviceArray_temp.forEach(device => {
-      let row = device;
-      row.status = [];
-      let deviceId = row.DeviceID;
+      let row = device
+      row.status = []
+      let deviceId = row.DeviceID
       let attributes = deviceAttributeArray.filter(deviceAttribute => {
-        return deviceAttribute.SecurityDeviceID === deviceId;
-      });
-      if(typeof attributes !== "undefined") {
+        return deviceAttribute.SecurityDeviceID === deviceId
+      })
+      if (typeof attributes !== 'undefined') {
         attributes.forEach(attribute => {
-          row.status.push(attribute.AttributeValue);
-        });
+          row.status.push(attribute.AttributeValue)
+        })
       }
-      deviceArray.push(row);
-    });
-    let deckLocationArray = deckLocations.deckLocationArray;
+      deviceArray.push(row)
+    })
+    let deckLocationArray = deckLocations.deckLocationArray
     let curLocations = [],
       curDevices = [];
     if (
@@ -214,23 +215,25 @@ class DeckView extends React.PureComponent {
       this.props.dispatch({
         type: 'SET_CUR_DECK',
         currentDeck: decksArray[1],
-      });
+      })
     } else {
       curLocations = deckLocationArray.filter(deckLocation => {
-        return deckLocation.DeckNumber === currentDeck.DeckNumber;
-      });
+        return deckLocation.DeckNumber === currentDeck.DeckNumber
+      })
     }
     curLocations.map(location => {
       let device = deviceArray.find(device => {
-        return device.LocationID === location.LocationID;
+        return device.LocationID === location.LocationID
       });
       if (typeof device !== 'undefined') {
-        let deviceInfo = Object.assign({}, device, location);
-        curDevices.push(deviceInfo);
+        let deviceInfo = Object.assign({}, device, location)
+        curDevices.push(deviceInfo)
       }
     });
+    let cameras = urls.cameras;
+
     //let deckImage = 'resources/images/icons/SVG/Deck ' + currentDeck.DeckNumber + ' Schematic.svg'
-    let deckImage = 'resources/images/decks/deck' + currentDeck.DeckNumber + '.png';
+    let deckImage = 'resources/images/decks/deck' + currentDeck.DeckNumber + '.png'
 
     return (
       <div
@@ -282,8 +285,9 @@ class DeckView extends React.PureComponent {
           let buttonImage = '';
           let accessInfo = {};
           let status = device.status;
+          console.log("CameraStatus: ", status);
           let status_type_id = 2;
-          if(status.include("Fwd")) {
+          if (status.includes('Fwd')) {
             status_type_id = 2;
           }
           switch (EquipmentTypeID) {
@@ -310,37 +314,52 @@ class DeckView extends React.PureComponent {
               switch (EquipmentSubTypeID) {
                 case 2: {
                   if (isSelected) {
-                    buttonImage = 'resources/images/decks/cameras/2/cameraFixedGreen.png'
+                    buttonImage = 'resources/images/decks/cameras/2/cameraFixedGreen.png';
                   } else {
-                    buttonImage = 'resources/images/decks/cameras/2/cameraFixedBlue.png'
+                    buttonImage = 'resources/images/decks/cameras/2/cameraFixedBlue.png';
                   }
-                  break
+                  break;
                 }
                 case 3: {
                   if (isSelected) {
-                    buttonImage = 'resources/images/decks/cameras/2/cameraPTZGreen.png'
+                    buttonImage = 'resources/images/decks/cameras/2/cameraPTZGreen.png';
                   } else {
-                    buttonImage = 'resources/images/decks/cameras/2/cameraPTZBlue.png'
+                    buttonImage = 'resources/images/decks/cameras/2/cameraPTZBlue.png';
                   }
-                  break
+                  break;
                 }
                 case 4: {
                   if (isSelected) {
-                    buttonImage = 'resources/images/decks/cameras/2/camera360Green.png'
+                    buttonImage = 'resources/images/decks/cameras/2/camera360Green.png';
                   } else {
-                    buttonImage = 'resources/images/decks/cameras/2/camera360Blue.png'
+                    buttonImage = 'resources/images/decks/cameras/2/camera360Blue.png';
                   }
-                  break
+                  break;
                 }
               }
-              accessInfo = device
-              accessInfo.left = left
-              accessInfo.top = top
-              break
+              accessInfo = device;
+              accessInfo.left = left;
+              accessInfo.top = top;
+              let cameraName = device.DeviceName;
+              let curCamera = cameras.find(camera => {
+                return camera.Name === cameraName;
+              });
+              if(typeof curCamera !== 'undefined') {
+                accessInfo.camera = curCamera;
+                let cameraId = curCamera.Id;
+                let cameraViews = widgetInfo.cameraViews;
+                let cameraViewInfo = cameraViews.find(view => {
+                  return view.id === cameraId;
+                });
+                if(typeof cameraViewInfo !== 'undefined') {
+                  accessInfo.cameraViewInfo = cameraViewInfo;
+                }
+              }
+              break;
             }
             case 3: {
               if (typeof currentDeck === 'undefined' || !currentDeck.hasOwnProperty('DeckName'))
-                return
+                return;
               //console.log("currentDeck: ", current);
               accessInfo = device
               accessInfo.enabled = true
@@ -378,7 +397,7 @@ class DeckView extends React.PureComponent {
             </button>
           )
         })}
-        <CameraPopup displayInfo={cameraPopupDisplay} info={cameraPopupInfo} />
+        <CameraPopup displayInfo={cameraPopupDisplay} info={cameraPopupInfo} addCameraView={this.props.addCameraView}/>
         <DeckSensorPopup displayInfo={deckSensorPopupDisplay} info={deckSensorPopupInfo} />
         <img src={cornerImage} className="cornerImage" alt="corner" />
       </div>
