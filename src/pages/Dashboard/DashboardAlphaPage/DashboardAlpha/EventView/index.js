@@ -1,12 +1,13 @@
 import React from 'react'
 import { connect } from 'react-redux'
-import { getAllSecurityEvents } from 'ducks/event'
+import { getAllSecurityEvents, updateEventLogs } from 'ducks/event'
 import $ from 'jquery'
 import './style.scss'
 
 let scroll_flag = true;
 let update_flag = true;
 let eventRow_count = 50;
+let init_flag = false;
 
 const mapStateToProps = (state, props) => ({
     urls: state.urls,
@@ -31,75 +32,33 @@ class EventView extends React.Component {
         limit_count: 50,
     }
 
-    componentDidMount() {}
+    constructor(props){
+        super(props);
+        init_flag = false;
+    }
 
-    onSortClick = type => {
-        let { sortType, sortOrder } = this.state
-        let { dispatch } = this.props
-        if (sortType === type) {
-            getAllSecurityEvents(dispatch, type, 1 - sortOrder)
-            dispatch({
-                type: 'SET_EVENT_LOG',
-                eventLogs: [],
-            });
-            setTimeout(() => {
-                this.setState({
-                    sortOrder: 1 - sortOrder,
-                    limit_count: 50,
-                })
-            }, 500);
-        } else {
-            getAllSecurityEvents(dispatch, type, 1);
-            dispatch({
-                type: 'SET_EVENT_LOG',
-                eventLogs: [],
-            });
-            setTimeout(() => {
-                this.setState({
-                    sortType: type,
-                    sortOrder: 1,
-                    limit_count: 50,
-                })
-            }, 500);
-        }
-        $('#eventTableContainer').scrollTop(0);
-        $('#eventTableContainer').find(".tableArea").css('display', 'none');
-        eventRow_count = 50;
-    };
+    componentDidMount() {
+        //this.initTable();
+    }
 
-    handleScroll = e => {
-        var node = e.target;
-        let { dispatch } = this.props;
-        if (node.scrollTop === 0) {
-            scroll_flag = !scroll_flag;
-            eventRow_count = 50;
-            dispatch({
-                type: 'SET_UPDATE',
-                update: true,
-            })
-        } else {
-            if(scroll_flag) {
-                scroll_flag = !scroll_flag;
-                dispatch({
-                    type: 'SET_UPDATE',
-                    update: false,
-                })
-            }
+    componentDidUpdate() {
+        if (!init_flag) {
+            this.initTable();
         }
-        const bottom = node.scrollHeight - node.scrollTop - node.clientHeight
-        if (bottom < 100) {
-            update_flag = !update_flag;
+    }
+
+    updateLatest = (latestLogs, latest_time) => {
+        let { sortType, sortOrder } = this.state;
+        if(!$('#eventTableContainer')[0])return;
+        let scrollTop = $('#eventTableContainer')[0].scrollTop;
+        if (sortType === 'datetime' && sortOrder === 0 && scrollTop === 0 && latestLogs.length > 0) {
+            latest_time = latestLogs[0].DateTime;
             let eventLogs = [];
-            let { eventInfo } = this.props;
-            let eventArray = eventInfo.eventLogs;
-            let cur_eventArray = [];
-            let count = 0;
-            if (typeof eventArray !== 'undefined') {
-                count = eventRow_count + 50 > eventArray.length ? eventArray.length : eventRow_count + 50;
-                cur_eventArray = eventArray.slice(eventRow_count, count);
-            }
-            cur_eventArray.forEach(event => {
-                let row = {};
+            let eventArray = latestLogs;
+            let length = eventArray.length;
+            for (let i = length - 1; i > -1 ; i --) {
+                let event = eventArray[i];
+                let row = {}
                 row.eventType = event.EventMsg.toUpperCase()
                 row.datetime = new Date(event.DateTime)
                     .toLocaleString('en-GB', { timeZone: 'UTC' })
@@ -112,7 +71,158 @@ class EventView extends React.Component {
                 } else if (
                     type_temp.includes('SENSOR') ||
                     type_temp.includes('DETECTED') ||
-                    type_temp.includes('MOTION')
+                    type_temp.includes('MOTION') ||
+                    type_temp.includes('DENIED') ||
+                    type_temp.includes('DENIED.')
+                ) {
+                    row.type = 'red'
+                } else {
+                    row.type = 'blue'
+                }
+                eventLogs.push(row)
+            }
+            this.renderLatest(eventLogs);
+        }
+        setTimeout(() => {
+            updateEventLogs(latest_time, (latestLogs) => {
+                this.updateLatest(latestLogs, latest_time);
+            });
+        }, 500);
+    };
+
+    initTable = () => {
+        let eventLogs = [];
+        let { eventInfo } = this.props;
+        let eventArray = eventInfo.eventLogs;
+        if (!init_flag && typeof eventArray !== 'undefined' && eventArray.length > 0) {
+            let { sortType, sortOrder } = this.state;
+            if (sortType === 'datetime' && sortOrder === 0) {
+                let latest_time = eventArray[0].DateTime;
+                updateEventLogs(latest_time, (latestLogs) => {
+                    this.updateLatest(latestLogs, latest_time);
+                });
+            }
+            let { limit_count } = this.state;
+            let count = limit_count > eventArray.length ? eventArray.length : limit_count;
+            let start = 0;
+            let cur_eventArray = eventArray.slice(start, count);
+            cur_eventArray.forEach(event => {
+                let row = {}
+                row.eventType = event.EventMsg.toUpperCase()
+                row.datetime = new Date(event.DateTime)
+                    .toLocaleString('en-GB', { timeZone: 'UTC' })
+                    .replace(',', '')
+                row.device = event.SecurityDevice.DeviceName.toUpperCase()
+                row.location = event.SecurityDevice.DeckLocation.LocationName.toUpperCase()
+                let type_temp = row.eventType.split(' ')
+                if (type_temp.includes('GRANTED')) {
+                    row.type = 'green'
+                } else if (
+                    type_temp.includes('SENSOR') ||
+                    type_temp.includes('DETECTED') ||
+                    type_temp.includes('MOTION') ||
+                    type_temp.includes('DENIED') ||
+                    type_temp.includes('DENIED.')
+                ) {
+                    row.type = 'red'
+                } else {
+                    row.type = 'blue'
+                }
+                eventLogs.push(row)
+            });
+            this.renderTable(eventLogs);
+            if ($('#eventTableContainer')) {
+                $('#eventTableContainer')
+                    .find('.tableArea')
+                    .css('display', 'block');
+            }
+            init_flag = true;
+        } else if (!init_flag && eventArray.length === 0) {
+            setTimeout(() => {
+                this.initTable();
+            }, 100);
+        }
+    };
+
+    onSortClick = type => {
+        $('#eventTableContainer').find('.tableArea').empty();
+        $('#eventTableContainer').scrollTop(0)
+        $('#eventTableContainer')
+            .find('.tableArea')
+            .css('display', 'none');
+        let { sortType, sortOrder } = this.state
+        let { dispatch } = this.props
+        if (sortType === type) {
+            dispatch({
+                type: 'INIT_EVENT_LOG',
+            });
+            getAllSecurityEvents(dispatch, type, 1 - sortOrder);
+            setTimeout(() => {
+                this.setState({
+                    sortOrder: 1 - sortOrder,
+                    limit_count: 50,
+                })
+            }, 500)
+        } else {
+            dispatch({
+                type: 'INIT_EVENT_LOG',
+                sortType: type,
+                order: 1
+            });
+            getAllSecurityEvents(dispatch, type, 1);
+            setTimeout(() => {
+                this.setState({
+                    sortType: type,
+                    sortOrder: 1,
+                    limit_count: 50,
+                })
+            }, 500);
+        }
+        init_flag = false;
+        eventRow_count = 50;
+        this.initTable();
+    }
+
+    handleScroll = e => {
+        var node = e.target
+        let { dispatch } = this.props
+        if (node.scrollTop === 0) {
+            scroll_flag = !scroll_flag;
+        } else {
+            if (scroll_flag) {
+                scroll_flag = !scroll_flag
+            }
+        }
+        const bottom = node.scrollHeight - node.scrollTop - node.clientHeight
+        if (bottom < 100) {
+            update_flag = !update_flag
+            let eventLogs = []
+            let { eventInfo } = this.props
+            let eventArray = eventInfo.eventLogs
+            let cur_eventArray = []
+            let count = 0
+            if (typeof eventArray !== 'undefined' && eventArray.length > 0) {
+                count = eventRow_count + 50 > eventArray.length ? eventArray.length : eventRow_count + 50;
+                cur_eventArray = eventArray.slice(eventRow_count, count)
+                eventRow_count = count > 0 ? count : eventRow_count;
+            }
+            cur_eventArray.forEach(event => {
+                let row = {}
+                row.eventType = event.EventMsg.toUpperCase()
+                row.datetime = new Date(event.DateTime)
+                    .toLocaleString('en-GB', { timeZone: 'UTC' })
+                    .replace(',', '')
+                row.device = event.SecurityDevice.DeviceName.toUpperCase()
+                row.location = event.SecurityDevice.DeckLocation.LocationName.toUpperCase()
+                let type_temp = row.eventType.split(' ')
+                if (type_temp.includes('GRANTED')) {
+                    row.type = 'green'
+                } else if (
+                    type_temp.includes('SENSOR') ||
+                    type_temp.includes('DETECTED') ||
+                    type_temp.includes('MOTION') ||
+                    type_temp.includes('DENIED') ||
+                    type_temp.includes('DENIED.')
                 ) {
                     row.type = 'red'
                 } else {
@@ -120,85 +230,98 @@ class EventView extends React.Component {
                 }
                 eventLogs.push(row)
             })
-            eventLogs.forEach(log => {
-                let className = 'row eventRow';
-                switch (log.type) {
-                    case 'red': {
-                        className += ' redRow';
-                        break;
-                    }
-                    case 'green': {
-                        className += ' greenRow';
-                        break;
-                    }
-                    case 'blue': {
-                        className += ' blueRow';
-                        break;
-                    }
-                }
-                let new_row = $(`<div class="` + className + `">
-                  <div class="col-3 eventItem">` + log.eventType + `</div>
-                  <div class="col-3 eventItem">` + log.datetime + `</div>
-                  <div class="col-3 eventItem">` + log.location + `</div>
-                  <div class="col-3 eventItem">` + log.device + `</div>
-                </div>`);
-                $("#eventTableContainer").find(".tableArea").append(new_row);
-            });
-            eventRow_count = count;
-            /*this.setState({
-              limit_count: limit_count + 100,
-            })*/
+            this.renderTable(eventLogs);
         }
-    };
+    }
+
+    renderLatest = (eventLogs) => {
+        eventLogs.forEach(log => {
+            let className = 'row eventRow'
+            switch (log.type) {
+                case 'red': {
+                    className += ' redRow'
+                    break
+                }
+                case 'green': {
+                    className += ' greenRow'
+                    break
+                }
+                case 'blue': {
+                    className += ' blueRow'
+                    break
+                }
+            }
+            let new_row = $(
+                `<div class="` +
+                className +
+                `">
+                  <div class="col-3 eventItem">` +
+                log.eventType +
+                `</div>
+                  <div class="col-3 eventItem">` +
+                log.datetime +
+                `</div>
+                  <div class="col-3 eventItem">` +
+                log.location +
+                `</div>
+                  <div class="col-3 eventItem">` +
+                log.device +
+                `</div>
+                </div>`,
+            )
+            $('#eventTableContainer')
+                .find('.tableArea')
+                .prepend(new_row)
+        })
+    }
+
+    renderTable = (eventLogs) => {
+        eventLogs.forEach(log => {
+            let className = 'row eventRow'
+            switch (log.type) {
+                case 'red': {
+                    className += ' redRow'
+                    break
+                }
+                case 'green': {
+                    className += ' greenRow'
+                    break
+                }
+                case 'blue': {
+                    className += ' blueRow'
+                    break
+                }
+            }
+            let new_row = $(
+                `<div class="` +
+                className +
+                `">
+                  <div class="col-3 eventItem">` +
+                log.eventType +
+                `</div>
+                  <div class="col-3 eventItem">` +
+                log.datetime +
+                `</div>
+                  <div class="col-3 eventItem">` +
+                log.location +
+                `</div>
+                  <div class="col-3 eventItem">` +
+                log.device +
+                `</div>
+                </div>`,
+            )
+            $('#eventTableContainer')
+                .find('.tableArea')
+                .append(new_row)
+        })
+    }
 
     render() {
-        let { border, sortType, sortOrder, limit_count } = this.state
+        let { border, sortType, sortOrder } = this.state
         let cornerImage = ''
         if (border === 'blue') {
             cornerImage = 'resources/images/background/blue-corner.png'
         }
-        let eventLogs = []
-        let { eventInfo } = this.props
-        let eventArray = eventInfo.eventLogs
-        let cur_eventArray = [];
-        let count = 0;
-        if (typeof eventArray !== 'undefined') {
-            count = limit_count > eventArray.length ? eventArray.length : limit_count;
-            let start = 0;
-            /*if(count > 300) {
-              start = count - 300;
-              if(update_flag) {
-                $('#eventTableContainer').scrollTop($('#eventTableContainer').scrollTop() - 50);
-                update_flag = !update_flag;
-              }
-            }*/
-            cur_eventArray = eventArray.slice(start, count);
-        }
-
-        cur_eventArray.forEach(event => {
-            let row = {}
-            row.eventType = event.EventMsg.toUpperCase()
-            row.datetime = new Date(event.DateTime)
-                .toLocaleString('en-GB', { timeZone: 'UTC' })
-                .replace(',', '')
-            row.device = event.SecurityDevice.DeviceName.toUpperCase()
-            row.location = event.SecurityDevice.DeckLocation.LocationName.toUpperCase()
-            let type_temp = row.eventType.split(' ')
-            if (type_temp.includes('GRANTED')) {
-                row.type = 'green'
-            } else if (
-                type_temp.includes('SENSOR') ||
-                type_temp.includes('DETECTED') ||
-                type_temp.includes('MOTION')
-            ) {
-                row.type = 'red'
-            } else {
-                row.type = 'blue'
-            }
-            eventLogs.push(row)
-        })
-
-        if($('#eventTableContainer'))$('#eventTableContainer').find(".tableArea").css('display', 'block');
 
         return (
             <div className="EventLogView">
@@ -273,31 +396,7 @@ class EventView extends React.Component {
                 </div>
                 <div className={'mainContainer'} id={'eventTableContainer'} onScroll={this.handleScroll}>
                     <div className={'tableArea'}>
-                        {eventLogs.map(event => {
-                            let className = 'row eventRow'
-                            switch (event.type) {
-                                case 'red': {
-                                    className += ' redRow'
-                                    break
-                                }
-                                case 'green': {
-                                    className += ' greenRow'
-                                    break
-                                }
-                                case 'blue': {
-                                    className += ' blueRow'
-                                    break
-                                }
-                            }
-                            return (
-                                <div className={className}>
-                                    <div className={'col-3 eventItem'}>{event.eventType}</div>
-                                    <div className={'col-3 eventItem'}>{event.datetime}</div>
-                                    <div className={'col-3 eventItem'}>{event.location}</div>
-                                    <div className={'col-3 eventItem'}>{event.device}</div>
-                                </div>
-                            )
-                        })}
+
                     </div>
                 </div>
                 <img src={cornerImage} className="cornerImage" alt="corner" />

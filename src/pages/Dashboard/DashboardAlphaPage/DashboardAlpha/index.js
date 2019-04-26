@@ -162,14 +162,17 @@ class DashboardAlpha extends React.PureComponent {
       () => {
         console.log('Failed to connect milestone server')
       },
-    )
-    getAllDecks(dispatch)
-    getAllDevices(dispatch)
-    getAllDeckLocations(dispatch)
-    getAllDeckZones(dispatch)
-    getAllSecurityEvents(dispatch)
-    getAllDeviceAttributes(dispatch)
-    message.loading('Connecting to milestone server...', 10)
+    );
+    getAllDecks(dispatch);
+    getAllDevices(dispatch);
+    getAllDeckLocations(dispatch);
+    getAllDeckZones(dispatch);
+    dispatch({
+        type: 'INIT_EVENT_LOG',
+    });
+    getAllSecurityEvents(dispatch);
+    getAllDeviceAttributes(dispatch);
+    message.loading('Connecting to milestone server...', 10);
   }
 
   handleChange = date => {
@@ -323,7 +326,7 @@ class DashboardAlpha extends React.PureComponent {
                 }
               }}
             >
-              <DeckView addCameraView={this.addCameraView}/>
+              <DeckView addCameraView={this.addCameraView} />
               <button className={'closeButton'} onClick={this.onRemoveItem.bind(this, id)} />
             </ReactSwipeEvents>
           </div>
@@ -496,7 +499,7 @@ class DashboardAlpha extends React.PureComponent {
           <Loader type="Ball-Triangle" color="#00BFFF" height="50rem" width="100%" />
         )}
         <AccessControlView accessInfo={accessInfo} />
-        <CameraEventView/>
+        <CameraEventView />
       </div>
     )
   }
