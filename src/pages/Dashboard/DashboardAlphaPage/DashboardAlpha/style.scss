@@ -1,5 +1,8 @@
 @import '../../../../resources/mixins';
 
+.DeckViewContainer {
+  z-index: 100;
+}
 .DataCard {
   padding: 0% 0%;
   margin-bottom: rem(35);

@@ -41,7 +41,7 @@ class SensorView extends React.Component {
     }
 
     return (
-      <div className={'CameraController'} onresize={this.handleResize}>
+      <div className={'SensorViewController'} onresize={this.handleResize}>
         <Unity unityContent={this.unityContent} />
         <img src={cornerImage} className="cornerImage" alt="corner" />
       </div>

@@ -4,10 +4,10 @@ import { getAllSecurityEvents, updateEventLogs } from 'ducks/event'
 import $ from 'jquery'
 import './style.scss'
 
-let scroll_flag = true;
-let update_flag = true;
-let eventRow_count = 50;
-let init_flag = false;
+let scroll_flag = true
+let update_flag = true
+let eventRow_count = 50
+let init_flag = false
 
 const mapStateToProps = (state, props) => ({
     urls: state.urls,
@@ -25,39 +25,54 @@ const mapDispatchToProps = (dispatch, props) => ({
     mapDispatchToProps,
 )
 class EventView extends React.Component {
-    state = {
-        border: 'blue',
-        sortType: 'datetime',
-        sortOrder: 0,
-        limit_count: 50,
-    }
-
-    constructor(props){
-        super(props);
+    constructor(props) {
+        super(props)
         init_flag = false;
+        this.state = {
+            border: 'blue',
+            sortType: 'datetime',
+            sortOrder: 0,
+            limit_count: 50,
+        }
     }
 
     componentDidMount() {
         //this.initTable();
+        let { dispatch } = this.props;
+        getAllSecurityEvents(dispatch, 'datetime', 0)
     }
 
     componentDidUpdate() {
         if (!init_flag) {
-            this.initTable();
+            this.initTable()
         }
+    }
+
+    componentWillUnmount() {
+        $('#eventTableContainer')
+            .find('.tableArea')
+            .empty();
+        $('#eventTableContainer').scrollTop(0);
+        $('#eventTableContainer')
+            .find('.tableArea');
+        let { dispatch } = this.props;
+        dispatch({
+            type: 'INIT_EVENT_LOG',
+        });
+        getAllSecurityEvents(dispatch, 'datetime', 0)
     }
 
     updateLatest = (latestLogs, latest_time) => {
-        let { sortType, sortOrder } = this.state;
-        if(!$('#eventTableContainer')[0])return;
-        let scrollTop = $('#eventTableContainer')[0].scrollTop;
+        let { sortType, sortOrder } = this.state
+        if (!$('#eventTableContainer')[0]) return
+        let scrollTop = $('#eventTableContainer')[0].scrollTop
         if (sortType === 'datetime' && sortOrder === 0 && scrollTop === 0 && latestLogs.length > 0) {
-            latest_time = latestLogs[0].DateTime;
-            let eventLogs = [];
-            let eventArray = latestLogs;
-            let length = eventArray.length;
-            for (let i = length - 1; i > -1 ; i --) {
-                let event = eventArray[i];
+            latest_time = latestLogs[0].DateTime
+            let eventLogs = []
+            let eventArray = latestLogs
+            let length = eventArray.length
+            for (let i = length - 1; i > -1; i--) {
+                let event = eventArray[i]
                 let row = {}
                 row.eventType = event.EventMsg.toUpperCase()
                 row.datetime = new Date(event.DateTime)
@@ -66,7 +81,7 @@ class EventView extends React.Component {
                 row.device = event.SecurityDevice.DeviceName.toUpperCase()
                 row.location = event.SecurityDevice.DeckLocation.LocationName.toUpperCase()
                 let type_temp = row.eventType.split(' ')
-                if (type_temp.includes('GRANTED')) {
+                if (type_temp.includes('GRANTED') || type_temp.includes('GRANTED.')) {
                     row.type = 'green'
                 } else if (
                     type_temp.includes('SENSOR') ||
@@ -81,131 +96,31 @@ class EventView extends React.Component {
                 }
                 eventLogs.push(row)
             }
-            this.renderLatest(eventLogs);
+            this.renderLatest(eventLogs)
         }
         setTimeout(() => {
-            updateEventLogs(latest_time, (latestLogs) => {
-                this.updateLatest(latestLogs, latest_time);
-            });
-        }, 500);
-    };
-
-    initTable = () => {
-        let eventLogs = [];
-        let { eventInfo } = this.props;
-        let eventArray = eventInfo.eventLogs;
-        if (!init_flag && typeof eventArray !== 'undefined' && eventArray.length > 0) {
-            let { sortType, sortOrder } = this.state;
-            if (sortType === 'datetime' && sortOrder === 0) {
-                let latest_time = eventArray[0].DateTime;
-                updateEventLogs(latest_time, (latestLogs) => {
-                    this.updateLatest(latestLogs, latest_time);
-                });
-            }
-            let { limit_count } = this.state;
-            let count = limit_count > eventArray.length ? eventArray.length : limit_count;
-            let start = 0;
-            let cur_eventArray = eventArray.slice(start, count);
-            cur_eventArray.forEach(event => {
-                let row = {}
-                row.eventType = event.EventMsg.toUpperCase()
-                row.datetime = new Date(event.DateTime)
-                    .toLocaleString('en-GB', { timeZone: 'UTC' })
-                    .replace(',', '')
-                row.device = event.SecurityDevice.DeviceName.toUpperCase()
-                row.location = event.SecurityDevice.DeckLocation.LocationName.toUpperCase()
-                let type_temp = row.eventType.split(' ')
-                if (type_temp.includes('GRANTED')) {
-                    row.type = 'green'
-                } else if (
-                    type_temp.includes('SENSOR') ||
-                    type_temp.includes('DETECTED') ||
-                    type_temp.includes('MOTION') ||
-                    type_temp.includes('DENIED') ||
-                    type_temp.includes('DENIED.')
-                ) {
-                    row.type = 'red'
-                } else {
-                    row.type = 'blue'
-                }
-                eventLogs.push(row)
-            });
-            this.renderTable(eventLogs);
-            if ($('#eventTableContainer')) {
-                $('#eventTableContainer')
-                    .find('.tableArea')
-                    .css('display', 'block');
-            }
-            init_flag = true;
-        } else if (!init_flag && eventArray.length === 0) {
-            setTimeout(() => {
-                this.initTable();
-            }, 100);
-        }
-    };
-
-    onSortClick = type => {
-        $('#eventTableContainer').find('.tableArea').empty();
-        $('#eventTableContainer').scrollTop(0)
-        $('#eventTableContainer')
-            .find('.tableArea')
-            .css('display', 'none');
-        let { sortType, sortOrder } = this.state
-        let { dispatch } = this.props
-        if (sortType === type) {
-            dispatch({
-                type: 'INIT_EVENT_LOG',
-            });
-            getAllSecurityEvents(dispatch, type, 1 - sortOrder);
-            setTimeout(() => {
-                this.setState({
-                    sortOrder: 1 - sortOrder,
-                    limit_count: 50,
-                })
-            }, 500)
-        } else {
-            dispatch({
-                type: 'INIT_EVENT_LOG',
-                sortType: type,
-                order: 1
-            });
-            getAllSecurityEvents(dispatch, type, 1);
-            setTimeout(() => {
-                this.setState({
-                    sortType: type,
-                    sortOrder: 1,
-                    limit_count: 50,
-                })
-            }, 500);
-        }
-        init_flag = false;
-        eventRow_count = 50;
-        this.initTable();
+            updateEventLogs(latest_time, latestLogs => {
+                this.updateLatest(latestLogs, latest_time)
+            })
+        }, 500)
     }
 
-    handleScroll = e => {
-        var node = e.target
-        let { dispatch } = this.props
-        if (node.scrollTop === 0) {
-            scroll_flag = !scroll_flag;
-        } else {
-            if (scroll_flag) {
-                scroll_flag = !scroll_flag
+    initTable = () => {
+        let eventLogs = []
+        let { eventInfo } = this.props
+        let eventArray = eventInfo.eventLogs
+        if (!init_flag && typeof eventArray !== 'undefined' && eventArray.length > 0) {
+            let { sortType, sortOrder } = this.state
+            if (sortType === 'datetime' && sortOrder === 0) {
+                let latest_time = eventArray[0].DateTime
+                updateEventLogs(latest_time, latestLogs => {
+                    this.updateLatest(latestLogs, latest_time)
+                })
             }
-        }
-        const bottom = node.scrollHeight - node.scrollTop - node.clientHeight
-        if (bottom < 100) {
-            update_flag = !update_flag
-            let eventLogs = []
-            let { eventInfo } = this.props
-            let eventArray = eventInfo.eventLogs
-            let cur_eventArray = []
-            let count = 0
-            if (typeof eventArray !== 'undefined' && eventArray.length > 0) {
-                count = eventRow_count + 50 > eventArray.length ? eventArray.length : eventRow_count + 50;
-                cur_eventArray = eventArray.slice(eventRow_count, count)
-                eventRow_count = count > 0 ? count : eventRow_count;
-            }
+            let { limit_count } = this.state
+            let count = limit_count > eventArray.length ? eventArray.length : limit_count
+            let start = 0
+            let cur_eventArray = eventArray.slice(start, count)
             cur_eventArray.forEach(event => {
                 let row = {}
                 row.eventType = event.EventMsg.toUpperCase()
@@ -215,7 +130,7 @@ class EventView extends React.Component {
                 row.device = event.SecurityDevice.DeviceName.toUpperCase()
                 row.location = event.SecurityDevice.DeckLocation.LocationName.toUpperCase()
                 let type_temp = row.eventType.split(' ')
-                if (type_temp.includes('GRANTED')) {
+                if (type_temp.includes('GRANTED') || type_temp.includes('GRANTED.')) {
                     row.type = 'green'
                 } else if (
                     type_temp.includes('SENSOR') ||
@@ -230,11 +145,113 @@ class EventView extends React.Component {
                 }
                 eventLogs.push(row)
             })
-            this.renderTable(eventLogs);
+            this.renderTable(eventLogs)
+            if ($('#eventTableContainer')) {
+                $('#eventTableContainer')
+                    .find('.tableArea')
+                    .css('display', 'block')
+            }
+            init_flag = true
+        } else if (!init_flag && eventArray.length === 0) {
+            setTimeout(() => {
+                this.initTable()
+            }, 100)
         }
     }
 
-    renderLatest = (eventLogs) => {
+    onSortClick = type => {
+        $('#eventTableContainer')
+            .find('.tableArea')
+            .empty()
+        $('#eventTableContainer').scrollTop(0)
+        $('#eventTableContainer')
+            .find('.tableArea')
+            .css('display', 'none')
+        let { sortType, sortOrder } = this.state
+        let { dispatch } = this.props
+        if (sortType === type) {
+            dispatch({
+                type: 'INIT_EVENT_LOG',
+            })
+            getAllSecurityEvents(dispatch, type, 1 - sortOrder)
+            setTimeout(() => {
+                this.setState({
+                    sortOrder: 1 - sortOrder,
+                    limit_count: 50,
+                })
+            }, 500)
+        } else {
+            dispatch({
+                type: 'INIT_EVENT_LOG',
+                sortType: type,
+                order: 1,
+            })
+            getAllSecurityEvents(dispatch, type, 1)
+            setTimeout(() => {
+                this.setState({
+                    sortType: type,
+                    sortOrder: 1,
+                    limit_count: 50,
+                })
+            }, 500)
+        }
+        init_flag = false
+        eventRow_count = 50
+        this.initTable()
+    }
+
+    handleScroll = e => {
+        var node = e.target
+        let { dispatch } = this.props
+        if (node.scrollTop === 0) {
+            scroll_flag = !scroll_flag
+        } else {
+            if (scroll_flag) {
+                scroll_flag = !scroll_flag
+            }
+        }
+        const bottom = node.scrollHeight - node.scrollTop - node.clientHeight
+        if (bottom < 100) {
+            update_flag = !update_flag
+            let eventLogs = []
+            let { eventInfo } = this.props
+            let eventArray = eventInfo.eventLogs
+            let cur_eventArray = []
+            let count = 0
+            if (typeof eventArray !== 'undefined' && eventArray.length > 0) {
+                count = eventRow_count + 50 > eventArray.length ? eventArray.length : eventRow_count + 50
+                cur_eventArray = eventArray.slice(eventRow_count, count)
+                eventRow_count = count > 0 ? count : eventRow_count
+            }
+            cur_eventArray.forEach(event => {
+                let row = {}
+                row.eventType = event.EventMsg.toUpperCase()
+                row.datetime = new Date(event.DateTime)
+                    .toLocaleString('en-GB', { timeZone: 'UTC' })
+                    .replace(',', '')
+                row.device = event.SecurityDevice.DeviceName.toUpperCase()
+                row.location = event.SecurityDevice.DeckLocation.LocationName.toUpperCase()
+                let type_temp = row.eventType.split(' ')
+                if (type_temp.includes('GRANTED') || type_temp.includes('GRANTED.')) {
+                    row.type = 'green'
+                } else if (
+                    type_temp.includes('SENSOR') ||
+                    type_temp.includes('DETECTED') ||
+                    type_temp.includes('MOTION') ||
+                    type_temp.includes('DENIED') ||
+                    type_temp.includes('DENIED.')
+                ) {
+                    row.type = 'red'
+                } else {
+                    row.type = 'blue'
+                }
+                eventLogs.push(row)
+            })
+            this.renderTable(eventLogs)
+        }
+    }
+
+    renderLatest = eventLogs => {
         eventLogs.forEach(log => {
             let className = 'row eventRow'
             switch (log.type) {
@@ -275,7 +292,7 @@ class EventView extends React.Component {
         })
     }
 
-    renderTable = (eventLogs) => {
+    renderTable = eventLogs => {
         eventLogs.forEach(log => {
             let className = 'row eventRow'
             switch (log.type) {
@@ -395,9 +412,7 @@ class EventView extends React.Component {
                     <div className={'col-3 headerItem'}>DEVICE</div>
                 </div>
                 <div className={'mainContainer'} id={'eventTableContainer'} onScroll={this.handleScroll}>
-                    <div className={'tableArea'}>
-
-                    </div>
+                    <div className={'tableArea'} />
                 </div>
                 <img src={cornerImage} className="cornerImage" alt="corner" />
             </div>

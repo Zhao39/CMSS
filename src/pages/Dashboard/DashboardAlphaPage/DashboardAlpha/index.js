@@ -162,17 +162,17 @@ class DashboardAlpha extends React.PureComponent {
       () => {
         console.log('Failed to connect milestone server')
       },
-    );
-    getAllDecks(dispatch);
-    getAllDevices(dispatch);
-    getAllDeckLocations(dispatch);
-    getAllDeckZones(dispatch);
+    )
+    getAllDecks(dispatch)
+    getAllDevices(dispatch)
+    getAllDeckLocations(dispatch)
+    getAllDeckZones(dispatch)
     dispatch({
-        type: 'INIT_EVENT_LOG',
-    });
-    getAllSecurityEvents(dispatch);
-    getAllDeviceAttributes(dispatch);
-    message.loading('Connecting to milestone server...', 10);
+      type: 'INIT_EVENT_LOG',
+    })
+    //getAllSecurityEvents(dispatch)
+    getAllDeviceAttributes(dispatch)
+    message.loading('Connecting to milestone server...', 10)
   }
 
   handleChange = date => {
@@ -315,7 +315,7 @@ class DashboardAlpha extends React.PureComponent {
       }
       case 'deckView': {
         return (
-          <div className={'DataCard bg-transparent'} key={id} data-grid={el}>
+          <div className={'DataCard bg-transparent DeckViewContainer'} key={id} data-grid={el}>
             <ReactSwipeEvents
               onSwiped={(e, originalX, originalY, currentX, currentY) => {
                 let dis = Math.sqrt(
@@ -335,7 +335,7 @@ class DashboardAlpha extends React.PureComponent {
       case 'sensorView': {
         return (
           <div
-            className={'DataCard bg-transparent'}
+            className={'DataCard bg-transparent static'}
             key={id}
             data-grid={el}
             onReset={() => {
