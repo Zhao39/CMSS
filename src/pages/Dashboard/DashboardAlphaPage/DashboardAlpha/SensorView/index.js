@@ -27,11 +27,23 @@ class SensorView extends React.Component {
     })
   }
 
+  componentDidUpdate() {
+    console.log("Resizing")
+  }
+
   componentDidMount() {}
 
   handleResize = () => {
     console.log('Resizing')
-  }
+  };
+
+  handleMouseDown = (e) => {
+    if(e.target.className !== 'movableArea') {
+      //e.preventDefault();
+      let { setSensorViewDraggable } = this.props;
+      setSensorViewDraggable(false);
+    }
+  };
 
   render() {
     let { border } = this.state
@@ -41,8 +53,11 @@ class SensorView extends React.Component {
     }
 
     return (
-      <div className={'SensorViewController'} onresize={this.handleResize}>
+      <div className={'SensorViewController'} onResize={this.handleResize} onMouseDown={this.handleMouseDown}>
         <Unity unityContent={this.unityContent} />
+        <div
+            className={'movableArea'}
+        />
         <img src={cornerImage} className="cornerImage" alt="corner" />
       </div>
     )

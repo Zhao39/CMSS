@@ -161,6 +161,18 @@ $font-dark: #333;
         display: none;
         background: rgba(0,40,80,0.8);
         li {
+          ul.submenuItems {
+            li {
+              cursor: pointer;
+              display: block;
+              color: rgba(0,237,255,1);
+              font-size: 0.9rem;
+              position: relative;
+              &:hover {
+                background: rgba(30,80,150,0.8);
+              }
+            }
+          }
           .listItem {
             cursor: pointer;
             display: block;
@@ -197,6 +209,9 @@ $font-dark: #333;
                 transform: scale(1.4);
               }
             }
+          }
+          &:hover {
+            background: rgba(30,80,150,0.8);
           }
         }
       }

@@ -2,10 +2,11 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 import { connect } from 'react-redux'
 import { getSecurityEventsByCameraId } from 'ducks/CameraEventView'
+import { getAllDeviceAttributes } from 'ducks/logHistory'
 import rootReducer from 'ducks/redux'
 import './style.scss'
-import {message} from "antd";
-import cookie from "react-cookie";
+import { message } from 'antd'
+import cookie from 'react-cookie'
 
 let socketUrl = rootReducer.socketUrl
 
@@ -38,17 +39,29 @@ class CameraPopup extends React.Component {
                 switch (command_type) {
                     case 'CameraLiftActionSingle': {
                         if (result_array.length === 6) {
-                            let result = result_array[5].slice(0, -1)
+                            let result = result_array[5].slice(0, -1);
+
                             if (result === 'OK') {
-                                this.setState({
-                                    securitySettingDisplay: 'block',
-                                })
+                                let cameraName = this.props.info.accessInfo.DeviceName;
+                                let command = result_array[4].slice(0, -1);
+                                message.info(cameraName + " is " + command==='Raise'?"raised":"lowered" + " successfully.");
+                                getAllDeviceAttributes(this.props.dispatch);
                             } else {
-                                message.error('User has no permission for setting system security level.')
+                                message.error('Can not raise/lower this camera..')
+                            }
+                        } else if (result_array.length === 7) {
+                            let result = result_array[5].slice(0, -1);
+
+                            if (result === 'OK') {
+                                let cameraName = this.props.info.accessInfo.DeviceName;
+                                let command = result_array[4].slice(0, -1);
+                                message.info(cameraName + " is " + command==='Raise'?"raised":"lowered" + " successfully.");
+                                getAllDeviceAttributes(this.props.dispatch);
+                            } else {
+                                message.error('Can not raise/lower this camera..')
                             }
                         }
-                        document.getElementById('root').style.cursor = 'default'
-                        break
+                        break;
                     }
                 }
             }
@@ -77,16 +90,28 @@ class CameraPopup extends React.Component {
                 switch (command_type) {
                     case 'CameraLiftActionSingle': {
                         if (result_array.length === 6) {
-                            let result = result_array[5].slice(0, -1)
+                            let result = result_array[5].slice(0, -1);
+
                             if (result === 'OK') {
-                                this.setState({
-                                    securitySettingDisplay: 'block',
-                                })
+                                let cameraName = this.props.info.accessInfo.DeviceName;
+                                let command = result_array[4].slice(0, -1);
+                                message.info(cameraName + " is " + command==='Raise'?"raised":"lowered" + " successfully.");
+                                getAllDeviceAttributes(this.props.dispatch);
                             } else {
-                                message.error('User has no permission for setting system security level.')
+                                message.error('Can not raise/lower this camera..')
+                            }
+                        } else if (result_array.length === 7) {
+                            let result = result_array[5].slice(0, -1);
+
+                            if (result === 'OK') {
+                                let cameraName = this.props.info.accessInfo.DeviceName;
+                                let command = result_array[4].slice(0, -1);
+                                message.info(cameraName + " is " + command==='Raise'?"raised":"lowered" + " successfully.");
+                                getAllDeviceAttributes(this.props.dispatch);
+                            } else {
+                                message.error('Can not raise/lower this camera..')
                             }
                         }
-                        document.getElementById('root').style.cursor = 'default'
                         break
                     }
                 }
@@ -109,26 +134,41 @@ class CameraPopup extends React.Component {
 
     onRaiseLowerClick = () => {
         if (!this.socketOpened) {
-            this.openSocket();
-            message.error('Socket is disconnected! ...Please try again.');
+            this.openSocket()
+            message.error('Socket is disconnected! ...Please try again.')
+        } else {
+            let { info } = this.props;
+            let accessInfo = info.accessInfo;
+            if(accessInfo.EquipmentSubTypeID === 2 && accessInfo.AuxDeviceID > 1) {
+                let message = "<CameraLiftActionSingle><";
+                let user = cookie.load("UserName");
+                let isRaise = accessInfo.status.includes('Raise');
+                console.log("isRaise", isRaise)
+                message += user + "><" + accessInfo.DeviceName + "><";
+                message += isRaise?"Lower>":"Raise>";
+                console.log("message: ", message);
+                this.ws.send(message);
+            } else {
+                message.warning("This camera is not lift camera.");
+            }
+
         }
-    };
+    }
 
     onCamDisplayClick = cameraID => {
         let { addCameraView } = this.props
         addCameraView(cameraID)
-    };
+    }
 
     onEventHistoryClick = () => {
-        let { dispatch, info } = this.props;
+        let { dispatch, info } = this.props
         dispatch({
             type: 'SET_CAMERA_EVENT_VIEW_DISPLAY',
             display: true,
             cameraInfo: info,
-        });
-        getSecurityEventsByCameraId(info.accessInfo.DeviceID, dispatch);
-
-    };
+        })
+        getSecurityEventsByCameraId(info.accessInfo.DeviceID, dispatch)
+    }
 
     render() {
         let { info, displayInfo } = this.props
@@ -136,9 +176,9 @@ class CameraPopup extends React.Component {
         let cameraId = ''
         let visible = false
         if (info.accessInfo) {
-            console.log("CameraInfo: ", info);
-            cameraId = info.accessInfo.camera?info.accessInfo.camera.Id:'';
-            visible = info.accessInfo.cameraViewInfo?info.accessInfo.cameraViewInfo.visible:true;
+            console.log('CameraInfo: ', info)
+            cameraId = info.accessInfo.camera ? info.accessInfo.camera.Id : ''
+            visible = info.accessInfo.cameraViewInfo ? info.accessInfo.cameraViewInfo.visible : true
         }
         let displayCam = visible ? 'none' : 'block'
         return (
