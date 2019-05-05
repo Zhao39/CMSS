@@ -105,8 +105,8 @@ class TopMenu extends React.Component {
                     case 'SystemInfo': {
                         console.log('SystemInfo: ', received_msg)
                         if (result_array.length === 8) {
-                            let securityLevel = result_array[5].slice(0, -1);
-                            let result = result_array[2].slice(0, -1);
+                            let securityLevel = result_array[5].slice(0, -1)
+                            let result = result_array[2].slice(0, -1)
                             if (result === 'OK') {
                                 let { dispatch } = this.props
                                 dispatch({
@@ -120,44 +120,44 @@ class TopMenu extends React.Component {
                         break
                     }
                     case 'CameraLiftActionAll': {
-                        console.log("CameraLiftActionAll: ", received_msg);
-                        let result = result_array[4].slice(0, -1);
-                        if(result === 'OK') {
-                            let type = result_array[3].slice(0, -1);
-                            if(type === 'Raise') {
-                                message.success("All cameras are raised successfully.");
+                        console.log('CameraLiftActionAll: ', received_msg)
+                        let result = result_array[4].slice(0, -1)
+                        if (result === 'OK') {
+                            let type = result_array[3].slice(0, -1)
+                            if (type === 'Raise') {
+                                message.success('All cameras are raised successfully.')
                             } else {
-                                message.success("All cameras are lowered successfully.");
+                                message.success('All cameras are lowered successfully.')
                             }
                         } else {
-                            let type = result_array[3].slice(0, -1);
-                            if(type === 'Raise') {
-                                message.error("Raise all cameras action is failed.");
+                            let type = result_array[3].slice(0, -1)
+                            if (type === 'Raise') {
+                                message.error('Raise all cameras action is failed.')
                             } else {
-                                message.error("Lower all cameras action is failed.");
+                                message.error('Lower all cameras action is failed.')
                             }
                         }
-                        break;
+                        break
                     }
                     case 'CameraLiftActionSingle': {
-                        console.log("CameraLiftActionSingle: ", received_msg);
-                        let result = result_array[4].slice(0, -1);
-                        if(result === 'OK') {
-                            let type = result_array[3].slice(0, -1);
-                            if(type === 'Raise') {
-                                message.success("Camera is raised successfully.");
+                        console.log('CameraLiftActionSingle: ', received_msg)
+                        let result = result_array[4].slice(0, -1)
+                        if (result === 'OK') {
+                            let type = result_array[3].slice(0, -1)
+                            if (type === 'Raise') {
+                                message.success('Camera is raised successfully.')
                             } else {
-                                message.success("Camera is lowered successfully.");
+                                message.success('Camera is lowered successfully.')
                             }
                         } else {
-                            let type = result_array[3].slice(0, -1);
-                            if(type === 'Raise') {
-                                message.error("Raise camera action is failed.");
+                            let type = result_array[3].slice(0, -1)
+                            if (type === 'Raise') {
+                                message.error('Raise camera action is failed.')
                             } else {
-                                message.error("Lower camera action is failed.");
+                                message.error('Lower camera action is failed.')
                             }
                         }
-                        break;
+                        break
                     }
                 }
             }
@@ -404,38 +404,77 @@ class TopMenu extends React.Component {
     }
 
     onCameraLiftItemClick = (deviceInfo, type) => {
-        console.log("CameraLiftClick: ", deviceInfo, type);
-        if(type === 2 || type === 3) {
-            if(deviceInfo.AuxDeviceID === 1) {
-                message.warning("This camera is not lift camera.");
-                return;
+        console.log('CameraLiftClick: ', deviceInfo, type)
+        if (type === 2 || type === 3) {
+            if (deviceInfo.AuxDeviceID === 1) {
+                message.warning('This camera is not lift camera.')
+                return
             }
         }
-        let messageInfo = "";
-        let user = cookie.load("UserName");
+        let messageInfo = ''
+        let user = cookie.load('UserName')
         switch (type) {
             case 0: {
-                messageInfo += "<CameraLiftActionAll><" + user + "><Raise>";
-                break;
+                messageInfo += '<CameraLiftActionAll><' + user + '><Raise>'
+                break
             }
             case 1: {
-                messageInfo += "<CameraLiftActionAll><" + user + "><Lower>";
-                break;
+                messageInfo += '<CameraLiftActionAll><' + user + '><Lower>'
+                break
             }
             case 2: {
-                messageInfo += "<CameraLiftActionSingle><" + user + "><" + deviceInfo.DeviceName + "><Raise>";
-                break;
+                messageInfo +=
+                    '<CameraLiftActionSingle><' + user + '><' + deviceInfo.DeviceName + '><Raise>'
+                break
             }
             case 3: {
-                messageInfo += "<CameraLiftActionSingle><" + user + "><" + deviceInfo.DeviceName + "><Lower>";
-                break;
+                messageInfo +=
+                    '<CameraLiftActionSingle><' + user + '><' + deviceInfo.DeviceName + '><Lower>'
+                break
             }
         }
         if (!this.socketOpened) {
             this.openSocket()
             message.error('Socket is disconnected! ...Please try again.')
         } else {
-            this.ws.send(messageInfo);
+            this.ws.send(messageInfo)
+        }
+    }
+
+    onDeckSensorItemClick = (zoneInfo, type) => {
+        console.log('CameraLiftClick: ', zoneInfo, type)
+        let messageInfo = ''
+        let user = cookie.load('UserName')
+        switch (type) {
+            case 0: {
+                messageInfo = "<DeckSensorAllEnable><" + user + "><Enable>";
+                break;
+            }
+            case 1: {
+                messageInfo = "<DeckSensorAllEnable><" + user + "><Disable>";
+                break;
+            }
+            case 2: {
+                let curDeck = this.props.decks.decksArray.find(deck => {
+                    return deck.DeckNumber === zoneInfo.DeckNumber;
+                });
+                messageInfo += "<DeckSensorZoneEnable><" + user + "><" + curDeck.DeckName + "><" + zoneInfo.DeckZoneName + "><Enable>";
+                break;
+            }
+            case 3: {
+                let curDeck = this.props.decks.decksArray.find(deck => {
+                    return deck.DeckNumber === zoneInfo.DeckNumber;
+                });
+                messageInfo += "<DeckSensorZoneEnable><" + user + "><" + curDeck.DeckName + "><" + zoneInfo.DeckZoneName + "><Disable>";
+                break;
+            }
+        }
+        console.log("message: ", messageInfo);
+        if (!this.socketOpened) {
+            this.openSocket()
+            message.error('Socket is disconnected! ...Please try again.')
+        } else {
+            this.ws.send(messageInfo)
         }
     }
 
@@ -481,9 +520,9 @@ class TopMenu extends React.Component {
     }
 
     handleDroneView = () => {
-        let { addSensorView } = this.props;
-        addSensorView();
-    };
+        let { addSensorView } = this.props
+        addSensorView()
+    }
 
     render() {
         let { decks, devices, deckLocations, urls, accessInfo, deckZonesInfo, systemInfo } = this.props
@@ -594,11 +633,12 @@ class TopMenu extends React.Component {
                             deckZones={deckZones}
                             dropDownItemClick={this.onDeckSensorDropDownClick}
                             expandedIndex={this.state.deckSensorExpand}
+                            itemClick={this.onDeckSensorItemClick}
                         />
                     </li>
                     <li>
                         <img className="menuItemImage" src={droneImage} alt="DroneView" />
-                        <DropDownDroneView type={'DRONE VIEW'} onClick={this.handleDroneView}/>
+                        <DropDownDroneView type={'DRONE VIEW'} onClick={this.handleDroneView} />
                     </li>
                     <li>
                         <img className="menuItemImage" src={eventLogImage} alt="EventLog" />
@@ -974,18 +1014,19 @@ function DropDownPlayback(props) {
 }
 
 function DropDownCamLift(props) {
-    let { type,
+    let {
+        type,
         dropDownItemClick,
         submenuDropDownItemClick,
         expandedIndex,
         submenuExpandedIndex,
         itemClick,
-        devices
-    } = props;
+        devices,
+    } = props
 
-    let cameraArray = devices.devicesArray.filter( device => {
-        return device.EquipmentTypeID === 2;
-    });
+    let cameraArray = devices.devicesArray.filter(device => {
+        return device.EquipmentTypeID === 2
+    })
     return (
         <ul className="dropdown">
             <li className="title">
@@ -1023,30 +1064,31 @@ function DropDownCamLift(props) {
                     className="submenuItems"
                     style={expandedIndex === 1 ? { display: 'block' } : { display: 'none' }}
                 >
-                    {
-                        cameraArray.map((camera)=> {
-                            let index = cameraArray.indexOf(camera);
-                            return (
-                                <li>
-                                    <div className="dropdownlink" onClick={submenuDropDownItemClick.bind(this, index)}>
-                                        <i
-                                            className={
-                                                submenuExpandedIndex !== index ? 'fa fa-caret-right' : 'fa fa-caret-down'
-                                            }
-                                            aria-hidden="true" />
-                                        {camera.DeviceName}
-                                    </div>
-                                    <ul
-                                        className="submenuItems"
-                                        style={submenuExpandedIndex === index ? { display: 'block' } : { display: 'none' }}
-                                    >
-                                        <li onClick={itemClick.bind(this, camera, 2)}>UP</li>
-                                        <li onClick={itemClick.bind(this, camera, 3)}>DOWN</li>
-                                    </ul>
-                                </li>
-                            )
-                        })
-                    }
+                    {cameraArray.map(camera => {
+                        let index = cameraArray.indexOf(camera)
+                        return (
+                            <li>
+                                <div className="dropdownlink" onClick={submenuDropDownItemClick.bind(this, index)}>
+                                    <i
+                                        className={
+                                            submenuExpandedIndex !== index ? 'fa fa-caret-right' : 'fa fa-caret-down'
+                                        }
+                                        aria-hidden="true"
+                                    />
+                                    {camera.DeviceName}
+                                </div>
+                                <ul
+                                    className="submenuItems"
+                                    style={
+                                        submenuExpandedIndex === index ? { display: 'block' } : { display: 'none' }
+                                    }
+                                >
+                                    <li onClick={itemClick.bind(this, camera, 2)}>UP</li>
+                                    <li onClick={itemClick.bind(this, camera, 3)}>DOWN</li>
+                                </ul>
+                            </li>
+                        )
+                    })}
                 </ul>
             </li>
         </ul>
@@ -1133,7 +1175,7 @@ function DropDownAccessPoint(props) {
 }
 
 function DropDownDeckSensor(props) {
-    let { type, deckZones, dropDownItemClick, expandedIndex } = props
+    let { type, deckZones, dropDownItemClick, expandedIndex, itemClick } = props
     return (
         <ul className="dropdown">
             <li className="title">
@@ -1153,10 +1195,10 @@ function DropDownDeckSensor(props) {
                     className="submenuItems"
                     style={expandedIndex === 0 ? { display: 'block' } : { display: 'none' }}
                 >
-                    <li>
+                    <li onClick={itemClick.bind(this, 'all', 0)}>
                         <div className={'listItem functionItem'}>{'ON'}</div>
                     </li>
-                    <li>
+                    <li onClick={itemClick.bind(this, 'all', 1)}>
                         <div className={'listItem functionItem'}>{'OFF'}</div>
                     </li>
                 </ul>
@@ -1180,8 +1222,14 @@ function DropDownDeckSensor(props) {
                         return (
                             <li>
                                 <div className={'subCaption'}>{deckZone.DeckZoneName}</div>
-                                <div className={'listItem functionItem'}>{'ON'}</div>
-                                <div className={'listItem functionItem'}>{'OFF'}</div>
+                                <div
+                                    className={'listItem functionItem'}
+                                    onClick={itemClick.bind(this, deckZone, 2)}
+                                >{'ON'}</div>
+                                <div
+                                    className={'listItem functionItem'}
+                                    onClick={itemClick.bind(this, deckZone, 3)}
+                                >{'OFF'}</div>
                             </li>
                         )
                     })}

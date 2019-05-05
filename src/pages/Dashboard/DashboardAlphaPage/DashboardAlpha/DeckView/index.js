@@ -402,7 +402,11 @@ class DeckView extends React.PureComponent {
           info={cameraPopupInfo}
           addCameraView={this.props.addCameraView}
         />
-        <DeckSensorPopup displayInfo={deckSensorPopupDisplay} info={deckSensorPopupInfo} />
+        <DeckSensorPopup
+            displayInfo={deckSensorPopupDisplay}
+            info={deckSensorPopupInfo}
+            currentDeck={currentDeck}
+        />
         <img src={cornerImage} className="cornerImage" alt="corner" />
       </div>
     )
