@@ -47,7 +47,7 @@ export default function(state = INITIAL_STATE, action) {
 }
 
 export function getSecurityEventsByCameraId(cameraId, dispatch, sortType = 'datetime', order = 0) {
-  ;(INITIAL_STATE.sortType = sortType), (INITIAL_STATE.order = order)
+  (INITIAL_STATE.sortType = sortType), (INITIAL_STATE.order = order)
   let url = rootReducer.serverUrl + '/api/securityEvents/eventLogsByCameraId'
   let url_1 = rootReducer.serverUrl + '/api/securityEvents/countByCameraId'
   axios

@@ -23,7 +23,7 @@ export default function(state = INITIAL_STATE, action) {
 }
 
 export function getAllSecurityEvents(dispatch, sortType = 'datetime', order = 0) {
-  ;(INITIAL_STATE.sortType = sortType), (INITIAL_STATE.order = order)
+  (INITIAL_STATE.sortType = sortType), (INITIAL_STATE.order = order)
   let url = rootReducer.serverUrl + '/api/securityEvents/allEventLogs'
   let url1 = rootReducer.serverUrl + '/api/securityEvents/count'
   axios.get(url1).then(response => {

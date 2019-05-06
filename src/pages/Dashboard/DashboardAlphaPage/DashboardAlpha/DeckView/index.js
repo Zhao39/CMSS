@@ -127,7 +127,6 @@ class DeckView extends React.PureComponent {
           },
           deckSensorPopupInfo: {},
         })
-        let eventLogs = this.props.eventInfo.eventLogs
 
         console.log('DeviceClick')
         document.getElementById('root').style.cursor = 'wait'
@@ -137,7 +136,7 @@ class DeckView extends React.PureComponent {
             type: 'CLEAR_DATA',
             accessInfo: accessInfo,
           })
-          getSecurityEventsByDeviceID(accessInfo, eventLogs, dispatch)
+          getSecurityEventsByDeviceID(accessInfo, dispatch)
         }, 100)
         break
       }
@@ -403,9 +402,9 @@ class DeckView extends React.PureComponent {
           addCameraView={this.props.addCameraView}
         />
         <DeckSensorPopup
-            displayInfo={deckSensorPopupDisplay}
-            info={deckSensorPopupInfo}
-            currentDeck={currentDeck}
+          displayInfo={deckSensorPopupDisplay}
+          info={deckSensorPopupInfo}
+          currentDeck={currentDeck}
         />
         <img src={cornerImage} className="cornerImage" alt="corner" />
       </div>
