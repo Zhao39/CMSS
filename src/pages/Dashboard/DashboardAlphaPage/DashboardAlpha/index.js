@@ -1,7 +1,7 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import ReactDom from 'react-dom'
-import Loader from 'react-loader-spinner'
+import SplashScreen from './SplashScreen/index'
 import { message } from 'antd'
 
 import _ from 'lodash'
@@ -173,7 +173,6 @@ class DashboardAlpha extends React.PureComponent {
     })
     //getAllSecurityEvents(dispatch)
     getAllDeviceAttributes(dispatch)
-    message.loading('Connecting to milestone server...', 10)
   }
 
   setSensorViewDraggable = flag => {
@@ -509,7 +508,7 @@ class DashboardAlpha extends React.PureComponent {
             {_.map(items, el => this.createElement(el))}
           </ResponsiveReactGridLayout>
         ) : (
-          <Loader type="Ball-Triangle" color="#00BFFF" height="50rem" width="100%" />
+          <SplashScreen />
         )}
         <AccessControlView accessInfo={accessInfo} />
         <CameraEventView />
