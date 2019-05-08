@@ -242,6 +242,22 @@ $font-dark: #333;
     }
   }
 
+  .palladium-logo {
+    width: 25rem!important;
+    li.title {
+      text-align: center;
+      label {
+        font-size: 25px;
+      }
+    }
+    li.content {
+      text-align: left;
+      margin-left: 15px;
+      height: 40px;
+      font-size: 18px;
+    }
+  }
+
   ul.dropdown::-webkit-scrollbar-track
   {
     -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);

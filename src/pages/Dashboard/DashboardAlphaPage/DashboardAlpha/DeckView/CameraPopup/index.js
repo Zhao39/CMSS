@@ -42,6 +42,7 @@ class CameraPopup extends React.Component {
               let result = result_array[5].slice(0, -1)
 
               if (result === 'OK') {
+                console.log("CameraPopup: ", this.props.info)
                 let cameraName = this.props.info.accessInfo.DeviceName
                 let command = result_array[4].slice(0, -1)
                 message.info(
@@ -101,7 +102,7 @@ class CameraPopup extends React.Component {
               let result = result_array[5].slice(0, -1)
 
               if (result === 'OK') {
-                let cameraName = this.props.info.accessInfo.DeviceName
+                let cameraName = this.props.info.accessInfo?this.props.info.accessInfo.DeviceName:"This device";
                 let command = result_array[4].slice(0, -1)
                 message.info(
                   cameraName + ' is ' + command === 'Raise'
@@ -116,7 +117,7 @@ class CameraPopup extends React.Component {
               let result = result_array[5].slice(0, -1)
 
               if (result === 'OK') {
-                let cameraName = this.props.info.accessInfo.DeviceName
+                  let cameraName = this.props.info.accessInfo?this.props.info.accessInfo.DeviceName:"This device";
                 let command = result_array[4].slice(0, -1)
                 message.info(
                   cameraName + ' is ' + command === 'Raise'
@@ -181,8 +182,11 @@ class CameraPopup extends React.Component {
       type: 'SET_CAMERA_EVENT_VIEW_DISPLAY',
       display: true,
       cameraInfo: info,
-    })
-    getSecurityEventsByCameraId(info.accessInfo.DeviceID, dispatch)
+    });
+    setTimeout(() => {
+        getSecurityEventsByCameraId(info.accessInfo.DeviceID, dispatch)
+    }, 10000);
+
   }
 
   render() {

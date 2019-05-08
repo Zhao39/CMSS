@@ -80,6 +80,8 @@ class TopMenu extends React.Component {
               if (result === 'OK') {
                 let data = '<GetSystemInfo>'
                 this.ws.send(data)
+              } else {
+                message.error("Can not change the security level.");
               }
             }
             break
@@ -115,6 +117,8 @@ class TopMenu extends React.Component {
                 })
                 cookie.save('SecurityLevelId', result_array[3].slice(0, -1))
                 cookie.save('SecurityLevelImage', result_array[5].slice(0, -1))
+              } else {
+
               }
             }
             break
@@ -141,20 +145,60 @@ class TopMenu extends React.Component {
           }
           case 'CameraLiftActionSingle': {
             console.log('CameraLiftActionSingle: ', received_msg)
-            let result = result_array[4].slice(0, -1)
+            let result = result_array[5].slice(0, -1)
             if (result === 'OK') {
-              let type = result_array[3].slice(0, -1)
+              let type = result_array[4].slice(0, -1)
               if (type === 'Raise') {
                 message.success('Camera is raised successfully.')
               } else {
                 message.success('Camera is lowered successfully.')
               }
             } else {
-              let type = result_array[3].slice(0, -1)
+              let type = result_array[4].slice(0, -1)
               if (type === 'Raise') {
                 message.error('Raise camera action is failed.')
               } else {
                 message.error('Lower camera action is failed.')
+              }
+            }
+            break
+          }
+          case 'DeckSensorAllEnable': {
+            console.log('DeckSensorAllEnable: ', received_msg)
+            let result = result_array[4].slice(0, -1)
+            if (result === 'OK') {
+              let type = result_array[3].slice(0, -1)
+              if (type === 'Enable') {
+                message.success('All deck sensors are enabled successfully.')
+              } else {
+                message.success('All deck sensors are disabled successfully.')
+              }
+            } else {
+              let type = result_array[3].slice(0, -1)
+              if (type === 'Enable') {
+                message.error('Enable all deck sensors is failed.')
+              } else {
+                message.error('Disable all deck sensors is failed.')
+              }
+            }
+            break
+          }
+          case 'DeckSensorZoneEnable': {
+            console.log('DeckSensorZoneEnable: ', received_msg)
+            let result = result_array[6].slice(0, -1)
+            if (result === 'OK') {
+              let type = result_array[5].slice(0, -1)
+              if (type === 'Enable') {
+                message.success('All deck sensors in this deck zone are enabled successfully.')
+              } else {
+                message.success('All deck sensors in this deck zone are disabled successfully.')
+              }
+            } else {
+              let type = result_array[5].slice(0, -1)
+              if (type === 'Enable') {
+                message.error('Enable all deck sensors in this deck zone is failed.')
+              } else {
+                message.error('Disable all deck sensors in this deck zone is failed.')
               }
             }
             break
@@ -204,6 +248,8 @@ class TopMenu extends React.Component {
               if (result === 'OK') {
                 let data = '<GetSystemInfo>'
                 this.ws.send(data)
+              } else {
+                message.error("Can not change the security level.")
               }
             }
             break
@@ -442,7 +488,6 @@ class TopMenu extends React.Component {
   }
 
   onDeckSensorItemClick = (zoneInfo, type) => {
-    console.log('CameraLiftClick: ', zoneInfo, type)
     let messageInfo = ''
     let user = cookie.load('UserName')
     switch (type) {
@@ -664,7 +709,7 @@ class TopMenu extends React.Component {
               src={palladiumLogoImage}
               alt="PalladiumLogo"
             />
-            <DropDown type={'PALLADIUM TECHNOLOGIES'} />
+            <DropDownLogo type={'PALLADIUM TECHNOLOGIES'} />
           </li>
           <li className={'securityLavel'} onClick={this.openLoginView}>
             <img
@@ -766,6 +811,42 @@ function DropDown(props) {
             <a href="#">Action book 3</a>
           </li>
         </ul>
+      </li>
+    </ul>
+  )
+}
+
+function DropDownLogo(props) {
+  let { type } = props
+  return (
+    <ul className="dropdown palladium-logo">
+      <li className="title">
+        <label style={{ textDecoration: 'underline' }}>{type}</label>
+      </li>
+      <li className={"content"}>
+        <div className="dropdownlink">
+            3900 SW 30th Avenue
+        </div>
+      </li>
+      <li className={"content"}>
+        <div className="dropdownlink">
+            Fort Lauderdale, FL 33312
+        </div>
+      </li>
+      <li className={"content"}>
+        <div className="dropdownlink">
+            USA
+        </div>
+      </li>
+      <li className={"content"}>
+        <div className="dropdownlink">
+            +1-954-653-0630
+        </div>
+      </li>
+      <li className={"content"}>
+         <div className="dropdownlink">
+            www.palladiumtechs.com
+        </div>
       </li>
     </ul>
   )

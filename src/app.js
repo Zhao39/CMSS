@@ -35,7 +35,7 @@ const App = () => (
     <ConnectedRouter history={history}>
         <LocaleProvider locale={enGB}>
             <div>
-                <Helmet titleTemplate="Clean UI - %s" />
+                <Helmet titleTemplate="Palladium Security System - %s" />
                 <Layout />
                 <script type="text/javascript" src="ducks/Milestone.js"></script>
             </div>

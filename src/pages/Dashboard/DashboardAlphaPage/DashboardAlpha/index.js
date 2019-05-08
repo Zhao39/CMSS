@@ -490,7 +490,7 @@ class DashboardAlpha extends React.PureComponent {
     }
     let { accessInfo } = this.props
     return (
-      <div>
+      <div id={"mainContainer"}>
         <TopMenu
           addCameraView={this.addCameraView}
           addDeckView={this.addDeckView}

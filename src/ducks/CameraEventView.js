@@ -12,6 +12,7 @@ const INITIAL_STATE = {
 export default function(state = INITIAL_STATE, action) {
   switch (action.type) {
     case 'SET_CAMERA_EVENT_VIEW_DISPLAY': {
+      console.log("CameraEventPopup")
       return {
         ...state,
         ...(state.display = action.display),

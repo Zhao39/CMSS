@@ -95,12 +95,6 @@ export function login(username, password, dispatch) {
   cookie.save('server', server)
   dispatch(_setHideLogin(true))
   dispatch(push('/dashboard'))
-  notification.open({
-    type: 'success',
-    message: 'You have successfully logged in!',
-    description:
-      'Welcome to the Clean UI Admin Template. The Clean UI Admin Template is a complimentary template that empowers developers to make perfect looking and useful apps!',
-  })
   return true
 }
 

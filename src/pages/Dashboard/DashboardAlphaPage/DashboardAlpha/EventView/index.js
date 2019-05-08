@@ -39,7 +39,7 @@ class EventView extends React.Component {
   componentDidMount() {
     //this.initTable();
     let { dispatch } = this.props
-    getAllSecurityEvents(dispatch, 'datetime', 0)
+    getAllSecurityEvents(dispatch, 'datetime', 0);
   }
 
   componentDidUpdate() {
@@ -83,11 +83,12 @@ class EventView extends React.Component {
         if (type_temp.includes('GRANTED') || type_temp.includes('GRANTED.')) {
           row.type = 'green'
         } else if (
-          type_temp.includes('SENSOR') ||
-          type_temp.includes('DETECTED') ||
-          type_temp.includes('MOTION') ||
-          type_temp.includes('DENIED') ||
-          type_temp.includes('DENIED.')
+            type_temp.includes('SENSOR') ||
+            type_temp.includes('DETECTED') ||
+            type_temp.includes('MOTION') ||
+            type_temp.includes('DENIED') ||
+            type_temp.includes('DRONE') ||
+            type_temp.includes('DENIED.')
         ) {
           row.type = 'red'
         } else {
@@ -132,11 +133,12 @@ class EventView extends React.Component {
         if (type_temp.includes('GRANTED') || type_temp.includes('GRANTED.')) {
           row.type = 'green'
         } else if (
-          type_temp.includes('SENSOR') ||
-          type_temp.includes('DETECTED') ||
-          type_temp.includes('MOTION') ||
-          type_temp.includes('DENIED') ||
-          type_temp.includes('DENIED.')
+            type_temp.includes('SENSOR') ||
+            type_temp.includes('DETECTED') ||
+            type_temp.includes('MOTION') ||
+            type_temp.includes('DENIED') ||
+            type_temp.includes('DRONE') ||
+            type_temp.includes('DENIED.')
         ) {
           row.type = 'red'
         } else {
@@ -238,6 +240,7 @@ class EventView extends React.Component {
           type_temp.includes('DETECTED') ||
           type_temp.includes('MOTION') ||
           type_temp.includes('DENIED') ||
+          type_temp.includes('DRONE') ||
           type_temp.includes('DENIED.')
         ) {
           row.type = 'red'
